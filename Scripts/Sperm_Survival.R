@@ -4,12 +4,14 @@ library(survminer)
 library(coxme)
 library(cmprsk)
 library(viridis)
+library(gridExtra)
 
 # Import the sperm motility data
 data <- read.csv("Data/Motility.csv")
 
 #Some data carpentry to get the data in the correct format for survival analysis
 data$Dead <- data$Total - data$Motile
+data$Proportion <- data$Motile/data$Total
 
 #Convert the times from time points to minutes
 data[which(data$Time == 0.5),"Time"] <- 30
@@ -79,7 +81,7 @@ results <- data.frame(HR = round(exp(coef(test)),2),
                       HR_max = round(exp(confint(test)),2)[,2],
                       P = extract_coxme_table(test)[,4])
 
-write.csv(results, file = "Results/Motility_Results.csv")
+#write.csv(results, file = "Results/Motility_Results.csv")
 
 
 
@@ -91,7 +93,7 @@ f1 <- survfit(surv_data ~ Treatment, data = DATA)
 
 png(filename="Figures/Survival_Fig.png", width = 2.25, height = 2, units = 'in', res=600)     
 
-FIG<- 
+B <- 
   ggsurvplot(f1,
              conf.int = T,
              palette = c("black", viridis(4)),
@@ -105,19 +107,19 @@ FIG<-
                              "0.3 \U03BCm",
                              "1.1 \U03BCm"),
              
-             ggtheme = theme_classic(base_size=6, base_family = "sans"),
+             ggtheme = theme_bw(base_size=6, base_family = "sans"),
              font.family = "sans",
              censor = F
   )
 
-FIG$plot <- FIG$plot + 
+B$plot <- B$plot + 
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
         axis.title.y = element_text(size=5, family = "sans", face = "bold"),
         axis.title.x = element_text(size=5, family = "sans", face = "bold"),
         axis.text.y = element_text(size=4, family = "sans"),
         axis.text.x  = element_text(size=4, family = "sans"),
-        plot.title = element_text(hjust = -0.05, size = 8, family = "sans", face = "bold"),
+        plot.title = element_text(hjust = -0.05, size = 6, family = "sans", face = "bold"),
         legend.position = c(0.15,0.2),
         legend.title = element_text(vjust = 5, size = 4, family = "sans", face = "bold"),
         legend.text = element_text(size = 3, family = "sans", face = "bold"),
@@ -129,10 +131,77 @@ FIG$plot <- FIG$plot +
         panel.background = element_rect(fill = "transparent"),
         plot.background = element_rect(fill = "transparent", color = NA))
 
-FIG
+B$plot <- B$plot + 
+  ggtitle("B")
+
+B
 
 dev.off()
 
+data$Time2 <- as.factor(data$Time)
+
+A <- 
+ggplot(data = data, 
+       aes(x = Time2,
+               y = Proportion,
+               fill = Treatment)) +
+  ggtitle("A") +
+  geom_point(aes(col = Treatment),
+             position = position_jitterdodge(jitter.width = 0.05),
+             size = 0.1) +
+  geom_boxplot(
+               alpha = 0.5,
+               size = 0.2,
+               outlier.size = 0) +
+  scale_fill_manual(labels = c("Control",
+                               "0.05 \U03BCm",
+                               "0.1 \U03BCm",
+                               "0.3 \U03BCm",
+                               "1.1 \U03BCm"),
+                    values = c("black", viridis(4))) +
+  scale_colour_manual(labels = c("Control",
+                               "0.05 \U03BCm",
+                               "0.1 \U03BCm",
+                               "0.3 \U03BCm",
+                               "1.1 \U03BCm"),
+                    values = c("black", viridis(4))) +
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.y = element_text(size=5, family = "sans", face = "bold"),
+        axis.title.x = element_text(size=5, family = "sans", face = "bold"),
+        axis.text.y = element_text(size=4, family = "sans"),
+        axis.text.x  = element_text(size=4, family = "sans"),
+        plot.title = element_text(hjust = -0.05, size = 6, family = "sans", face = "bold"),
+        legend.position = c(0.1,0.2),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 3, family = "sans", face = "bold"),
+        legend.background =  element_rect(fill = "transparent", colour = "transparent"),
+        legend.key = element_rect(fill = "transparent", colour = "transparent"),
+        legend.key.size = unit(0.15, "cm"),
+        legend.key.width = unit(0.2, "cm"),
+        legend.spacing.y = unit(-0.1, "cm"),
+        panel.background = element_rect(fill = "transparent"),
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_y_continuous(limits = c(0,1), expand = c(0,0)) +
+  
+  ylab(expression(bold(Proportion~motile)))+
+  xlab(expression(bold(Time~(min))))
+
+
+
+FIG <-
+  grid.arrange(A,
+               B$plot,
+               ncol=2,
+               nrow=1)
+
+#Save the figures
+ggsave(FIG,
+       width = 5.75, height = 2, units = "in",
+       dpi = 600,
+       bg = "transparent",
+       file="Figures/Motility_Fig.png")
 
 
 # Quick test of the cumulative incidence rate
