@@ -5,6 +5,7 @@ library(coxme)
 library(cmprsk)
 library(viridis)
 library(gridExtra)
+library(lme4)
 
 # Import the sperm motility data
 data <- read.csv("Data/Motility.csv")
@@ -12,6 +13,7 @@ data <- read.csv("Data/Motility.csv")
 #Some data carpentry to get the data in the correct format for survival analysis
 data$Dead <- data$Total - data$Motile
 data$Proportion <- data$Motile/data$Total
+data$Proportion2 <- data$Dead/data$Total
 
 #Convert the times from time points to minutes
 data[which(data$Time == 0.5),"Time"] <- 30
@@ -35,13 +37,13 @@ for(i in 1:nrow(data)){
                        bull = rep(data[i,"bull"], data[i,"Total"]),
                        Treatment = rep(data[i,"Treatment"], data[i,"Total"]),
                        Time = rep(data[i,"Time"], data[i,"Total"]),
-                       Status = rep(0, data[i,"Total"]))
+                       Status = rep(1, data[i,"Total"]))
   
   # Set up which sperm should be marked as dead
   START <- data[i,"Motile"]+1
   END <- as.numeric(data[i,"Total"])
   
-  data_i[START:END,"Status"] <- 1
+  data_i[START:END,"Status"] <- 0
   
   #Save the results in the list
   DATA[[i]] <- data_i
@@ -140,19 +142,19 @@ dev.off()
 
 data$Time2 <- as.factor(data$Time)
 
-A <- 
-ggplot(data = data, 
-       aes(x = Time2,
-               y = Proportion,
-               fill = Treatment)) +
+#A <- 
+  ggplot(data = data, 
+         aes(x = Time2,
+             y = Proportion,
+             fill = Treatment)) +
   ggtitle("A") +
   geom_point(aes(col = Treatment),
              position = position_jitterdodge(jitter.width = 0.05),
              size = 0.1) +
   geom_boxplot(
-               alpha = 0.5,
-               size = 0.2,
-               outlier.size = 0) +
+    alpha = 0.5,
+    size = 0.2,
+    outlier.size = 0) +
   scale_fill_manual(labels = c("Control",
                                "0.05 \U03BCm",
                                "0.1 \U03BCm",
@@ -160,11 +162,11 @@ ggplot(data = data,
                                "1.1 \U03BCm"),
                     values = c("black", viridis(4))) +
   scale_colour_manual(labels = c("Control",
-                               "0.05 \U03BCm",
-                               "0.1 \U03BCm",
-                               "0.3 \U03BCm",
-                               "1.1 \U03BCm"),
-                    values = c("black", viridis(4))) +
+                                 "0.05 \U03BCm",
+                                 "0.1 \U03BCm",
+                                 "0.3 \U03BCm",
+                                 "1.1 \U03BCm"),
+                      values = c("black", viridis(4))) +
   theme_bw()+
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -211,3 +213,290 @@ test2
 plot(test2,
      xlab = "Time (min)",
      ylab = "Probability of death")
+
+
+
+# Using logistic regression model
+FIT <- glmer(Status ~ Time +Treatment + (1|bull) + (1|Replicate),
+             family = binomial,
+             data = DATA)
+
+FIT2 <- glmer(Status ~ Time*Treatment + (1|bull) + (Time|Replicate),
+              family = binomial,
+              data = DATA[which(DATA$Time !=30),])
+
+summary(FIT2)
+
+gtsummary::tbl_regression(FIT2, intercept= T, exp = T) 
+
+
+MP_0.05_Fit <- function(x) {
+  B_0 <- 0.9196660
+  B_1 <- -0.0128080
+  B_2 <- 0.1456147 
+  B_3 <- -0.0060353
+  mu = exp(B_0 + B_1*x + B_2 + B_3*x)/(1+exp(B_0 + B_1*x + B_2 + B_3*x))
+  mu
+}
+
+MP_0.05_pred <- data.frame(pred = MP_0.05_Fit(0:120),
+                           Time = seq(0,120),
+                           Treatment = "MP_0.05")
+
+MP_0.1_Fit <- function(x) {
+  B_0 <- 0.9196660
+  B_1 <- -0.0128080
+  B_2 <- 0.0548713 
+  B_3 <- -0.0048743
+  mu = exp(B_0 + B_1*x + B_2 + B_3*x)/(1+exp(B_0 + B_1*x + B_2 + B_3*x))
+  mu
+}
+
+MP_0.1_pred <- data.frame(pred = MP_0.1_Fit(0:120),
+                          Time = seq(0,120),
+                          Treatment = "MP_0.1")
+
+
+MP_0.3_Fit <- function(x) {
+  B_0 <- 0.9196660
+  B_1 <- -0.0128080
+  B_2 <- -0.1299645 
+  B_3 <- -0.0005587
+  mu = exp(B_0 + B_1*x + B_2 + B_3*x)/(1+exp(B_0 + B_1*x + B_2 + B_3*x))
+  mu
+}
+
+MP_0.3_pred <- data.frame(pred = MP_0.3_Fit(0:120),
+                          Time = seq(0,120),
+                          Treatment = "MP_0.3")
+
+MP_1.1_Fit <- function(x) {
+  B_0 <- 0.9196660
+  B_1 <- -0.0128080
+  B_2 <- -0.1039209 
+  B_3 <- -0.0015938
+  mu = exp(B_0 + B_1*x + B_2 + B_3*x)/(1+exp(B_0 + B_1*x + B_2 + B_3*x))
+  mu
+}
+
+MP_1.1_pred <- data.frame(pred = MP_1.1_Fit(0:120),
+                          Time = seq(0,120),
+                          Treatment = "MP_1.1")
+
+
+Control_Fit <- function(x) {
+  B_0 <- 0.9196660
+  B_1 <- -0.0128080
+  B_2 <- 0 
+  B_3 <- 0
+  mu = exp(B_0 + B_1*x + B_2 + B_3*x)/(1+exp(B_0 + B_1*x + B_2 + B_3*x))
+  mu
+}
+
+Control_pred <- data.frame(pred = Control_Fit(0:120),
+                           Time = seq(0,120),
+                           Treatment = "Control")
+
+
+
+A <- 
+  ggplot(data = data[which(data$Time !=30),], 
+         aes(x = Time2,
+             y = Proportion,
+             fill = Treatment)) +
+  #ggtitle("A") +
+  # geom_point(aes(col = Treatment,
+  #                size = Time2),
+  #            position = position_jitterdodge(jitter.width = 0.05)) +
+  geom_boxplot(aes(size = Time2),
+               alpha = 0.5,
+               outlier.size = 0) +
+  geom_path(data = Control_pred, aes(x = Time, y = pred, col = Treatment)) +
+  geom_path(data = MP_0.05_pred, aes(x = Time, y = pred, col = Treatment)) +
+  geom_path(data = MP_0.1_pred, aes(x = Time, y = pred, col = Treatment)) +
+  geom_path(data = MP_0.3_pred, aes(x = Time, y = pred, col = Treatment)) +
+  geom_path(data = MP_1.1_pred, aes(x = Time, y = pred, col = Treatment)) +
+  scale_size_manual(labels = c("Control",
+                               "0.05 \U03BCm",
+                               "0.1 \U03BCm",
+                               "0.3 \U03BCm",
+                               "1.1 \U03BCm"),
+                    values = c(0.2,0.2,0.2,0.2,0.2),
+                    guide = "none")+
+  scale_fill_manual(labels = c("Control",
+                               "0.05 \U03BCm",
+                               "0.1 \U03BCm",
+                               "0.3 \U03BCm",
+                               "1.1 \U03BCm"),
+                    values = c("black", viridis(4)),
+                    guide = "none") +
+    scale_color_manual(labels = c("Control",
+                                 "0.05 \U03BCm",
+                                 "0.1 \U03BCm",
+                                 "0.3 \U03BCm",
+                                 "1.1 \U03BCm"),
+                      values = c("black", viridis(4))) +
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.y = element_text(size=5, family = "sans", face = "bold"),
+        axis.title.x = element_text(size=5, family = "sans", face = "bold"),
+        axis.text.y = element_text(size=4, family = "sans"),
+        axis.text.x  = element_text(size=4, family = "sans"),
+        plot.title = element_text(hjust = -0.05, size = 6, family = "sans", face = "bold"),
+        legend.position = c(0.1,0.2),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 3, family = "sans", face = "bold"),
+        legend.background =  element_rect(fill = "transparent", colour = "transparent"),
+        legend.key = element_rect(fill = "transparent", colour = "transparent"),
+        legend.key.size = unit(0.15, "cm"),
+        legend.key.width = unit(0.2, "cm"),
+        legend.spacing.y = unit(-0.1, "cm"),
+        panel.background = element_rect(fill = "transparent"),
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_y_continuous(limits = c(0,1), expand = c(0,0)) +
+  scale_x_continuous(limits = c(-15,135), breaks = c(0,30,60,90,120)) +
+  
+  ylab(expression(bold(Proportion~motile))) +
+  xlab(expression(bold(Time~(min))))
+
+
+#Save the figures
+ggsave(A,
+       width = 5.75, height = 3, units = "in",
+       dpi = 600,
+       bg = "transparent",
+       file="Figures/Motility_Fig_4.png")
+
+
+
+
+
+
+
+
+
+A <- 
+  ggplot(data = data[which(data$Time !=30),], 
+         aes(x = Time2,
+             y = Proportion,
+             fill = Treatment)) +
+  #ggtitle("A") +
+   geom_point(aes(col = Treatment),
+              position = position_jitterdodge(jitter.width = 0.05),
+              size = 0.1) +
+  geom_boxplot(size = 0.2,
+               alpha = 0.5,
+               outlier.size = 0) +
+  scale_fill_manual(labels = c("Control",
+                               "0.05 \U03BCm",
+                               "0.1 \U03BCm",
+                               "0.3 \U03BCm",
+                               "1.1 \U03BCm"),
+                    values = c("black", viridis(4)),guide = "none") +
+  scale_color_manual(labels = c("Control",
+                                "0.05 \U03BCm",
+                                "0.1 \U03BCm",
+                                "0.3 \U03BCm",
+                                "1.1 \U03BCm"),
+                     values = c("black", viridis(4)),guide = "none") +
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.y = element_text(size=5, family = "sans", face = "bold"),
+        axis.title.x = element_text(size=5, family = "sans", face = "bold"),
+        axis.text.y = element_text(size=4, family = "sans"),
+        axis.text.x  = element_text(size=4, family = "sans"),
+        plot.title = element_text(hjust = -0.05, size = 6, family = "sans", face = "bold"),
+        legend.position = c(0.1,0.2),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 3, family = "sans", face = "bold"),
+        legend.background =  element_rect(fill = "transparent", colour = "transparent"),
+        legend.key = element_rect(fill = "transparent", colour = "transparent"),
+        legend.key.size = unit(0.15, "cm"),
+        legend.key.width = unit(0.2, "cm"),
+        legend.spacing.y = unit(-0.1, "cm"),
+        panel.background = element_rect(fill = "transparent"),
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_y_continuous(limits = c(0,1), expand = c(0,0)) +
+  
+  ylab(expression(bold(Proportion~motile))) +
+  xlab(expression(bold(Time~(min))))
+
+
+
+
+
+B <- 
+  ggplot(data = data[which(data$Time !=30),], 
+         aes(x = Time2,
+             y = Proportion,
+             fill = Treatment)) +
+  ggtitle("B") +
+  geom_path(data = Control_pred, aes(x = Time, y = pred, col = Treatment)) +
+  geom_path(data = MP_0.05_pred, aes(x = Time, y = pred, col = Treatment)) +
+  geom_path(data = MP_0.1_pred, aes(x = Time, y = pred, col = Treatment)) +
+  geom_path(data = MP_0.3_pred, aes(x = Time, y = pred, col = Treatment)) +
+  geom_path(data = MP_1.1_pred, aes(x = Time, y = pred, col = Treatment)) +
+  scale_size_manual(labels = c("Control",
+                               "0.05 \U03BCm",
+                               "0.1 \U03BCm",
+                               "0.3 \U03BCm",
+                               "1.1 \U03BCm"),
+                    values = c(0.2,0.2,0.2,0.2,0.2),
+                    guide = "none")+
+  scale_fill_manual(labels = c("Control",
+                               "0.05 \U03BCm",
+                               "0.1 \U03BCm",
+                               "0.3 \U03BCm",
+                               "1.1 \U03BCm"),
+                    values = c("black", viridis(4)),
+                    guide = "none") +
+  scale_color_manual(labels = c("Control",
+                                "0.05 \U03BCm",
+                                "0.1 \U03BCm",
+                                "0.3 \U03BCm",
+                                "1.1 \U03BCm"),
+                     values = c("black", viridis(4))) +
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.y = element_text(size=5, family = "sans", face = "bold"),
+        axis.title.x = element_text(size=5, family = "sans", face = "bold"),
+        axis.text.y = element_text(size=4, family = "sans"),
+        axis.text.x  = element_text(size=4, family = "sans"),
+        plot.title = element_text(hjust = -0.05, size = 6, family = "sans", face = "bold"),
+        legend.position = c(0.1,0.2),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 3, family = "sans", face = "bold"),
+        legend.background =  element_rect(fill = "transparent", colour = "transparent"),
+        legend.key = element_rect(fill = "transparent", colour = "transparent"),
+        legend.key.size = unit(0.15, "cm"),
+        legend.key.width = unit(0.2, "cm"),
+        legend.spacing.y = unit(-0.1, "cm"),
+        panel.background = element_rect(fill = "transparent"),
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_y_continuous(limits = c(0,1), expand = c(0,0)) +
+  scale_x_continuous(limits = c(0,120), breaks = c(0,30,60,90,120),expand = c(0,1)) +
+  
+  ylab(expression(bold(Proportion~motile))) +
+  xlab(expression(bold(Time~(min))))
+
+
+
+
+FIG <-
+  grid.arrange(A,
+               B,
+               ncol=2,
+               nrow=1)
+
+#Save the figures
+ggsave(A,
+       width = 5.75, height = 3, units = "in",
+       dpi = 600,
+       bg = "transparent",
+       file="Figures/Motility_Fig.png")
+
+
+
