@@ -143,10 +143,10 @@ dev.off()
 data$Time2 <- as.factor(data$Time)
 
 #A <- 
-  ggplot(data = data, 
-         aes(x = Time2,
-             y = Proportion,
-             fill = Treatment)) +
+ggplot(data = data, 
+       aes(x = Time2,
+           y = Proportion,
+           fill = Treatment)) +
   ggtitle("A") +
   geom_point(aes(col = Treatment),
              position = position_jitterdodge(jitter.width = 0.05),
@@ -217,13 +217,24 @@ plot(test2,
 
 
 # Using logistic regression model
-FIT <- glmer(Status ~ Time +Treatment + (1|bull) + (1|Replicate),
-             family = binomial,
-             data = DATA)
+NULL_MOD <- glmer(Status ~ 1 + (1|bull) + (1|Replicate),
+                  family = binomial,
+                  data = DATA)
 
-FIT2 <- glmer(Status ~ Time*Treatment + (1|bull) + (Time|Replicate),
-              family = binomial,
-              data = DATA[which(DATA$Time !=30),])
+TIME_MOD <- glmer(Status ~ Time + (1|bull) + (1|Replicate),
+                  family = binomial,
+                  data = DATA)
+
+TIME_TREAT_MOD <- glmer(Status ~ Time + Treatment + (1|bull) + (1|Replicate),
+                        family = binomial,
+                        data = DATA)
+
+FULL_MOD <- glmer(Status ~ Time*Treatment + (1|bull) + (Time|Replicate),
+                  family = binomial,
+                  data = DATA[which(DATA$Time !=30),])
+
+
+MuMIn::AICc(NULL_MOD,TIME_MOD,TIME_TREAT_MOD,TIME_TREAT_MOD)
 
 summary(FIT2)
 
@@ -330,12 +341,12 @@ A <-
                                "1.1 \U03BCm"),
                     values = c("black", viridis(4)),
                     guide = "none") +
-    scale_color_manual(labels = c("Control",
-                                 "0.05 \U03BCm",
-                                 "0.1 \U03BCm",
-                                 "0.3 \U03BCm",
-                                 "1.1 \U03BCm"),
-                      values = c("black", viridis(4))) +
+  scale_color_manual(labels = c("Control",
+                                "0.05 \U03BCm",
+                                "0.1 \U03BCm",
+                                "0.3 \U03BCm",
+                                "1.1 \U03BCm"),
+                     values = c("black", viridis(4))) +
   theme_bw()+
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -382,9 +393,9 @@ A <-
              y = Proportion,
              fill = Treatment)) +
   #ggtitle("A") +
-   geom_point(aes(col = Treatment),
-              position = position_jitterdodge(jitter.width = 0.05),
-              size = 0.1) +
+  geom_point(aes(col = Treatment),
+             position = position_jitterdodge(jitter.width = 0.05),
+             size = 0.1) +
   geom_boxplot(size = 0.2,
                alpha = 0.5,
                outlier.size = 0) +

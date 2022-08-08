@@ -1,0 +1,159 @@
+---
+title: "The effects of microplastics on reproduction"
+author: "Nicole Grechi, Michael J Noonan, Marcia de Almeida Monterio Melo Ferraz"
+output:
+  html_document:
+    css: tutorial.css
+    fig_caption: yes
+    highlight: textmate
+    theme: flatly
+    toc: yes
+    toc_float: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4)
+knitr::opts_knit$set(root.dir = "/Users/mikenoonan/Dropbox/UBC/Side_Projects/MPs_and_Fertility")
+```
+This script was last updated on `r format(Sys.time(), '%B %d, %Y')`.
+
+* * *
+# Background
+
+This file walks through the statistical analyses used to assess the effects of microplastics on sperm and oocyte function _in vitro_.
+
+### Packages
+The \texttt{R} packages used in these analyses are detailed below. Package versions are included at the end of this document.
+
+```{r}
+# Packages used in the analyses
+library(lme4)
+library(MuMIn)
+library(gtsummary)
+library(ggplot2)
+```
+
+* * *
+# Sperm
+The first step was to assess the effects of microplastics exposure on sperm survival. This was done using generalised linear regression models with a binomial error distribution.
+
+
+## Effects of MPs on sperm motility
+
+The first step was to import the sperm motility data and carry out some basic data carpentry in order to get the data in the correct format for analysis.
+```{r}
+# Import the sperm motility data
+data <- read.csv("Data/Motility.csv")
+
+# Rename a few variables
+data$Dead <- data$Total - data$Motile
+data$Motile <- data$Motile/data$Total
+data$Dead <- data$Dead/data$Total
+
+# Convert the arbitrary time points to minutes since start of the experiment
+data[which(data$Time == 0.5),"Time"] <- 30
+data[which(data$Time == 1),"Time"] <- 60
+data[which(data$Time == 1.5),"Time"] <- 90
+data[which(data$Time == 2),"Time"] <- 120
+
+# Convert time to a factor for plotting purposes only
+data$Time2 <- as.factor(data$Time)
+
+# Rename the groups
+data[which(data$Treatment == "CT"),"Treatment"] <- "Control"
+data[which(data$Treatment == "B0.3"),"Treatment"] <- "MP_0.3"
+data[which(data$Treatment == "B1.1"),"Treatment"] <- "MP_1.1"
+data[which(data$Treatment == "B0.05"),"Treatment"] <- "MP_0.05"
+data[which(data$Treatment == "B0.1"),"Treatment"] <- "MP_0.1"
+
+# Drop a time point with questionable data
+data <- data[which(data$Time !=30),]
+```
+
+After importing and preparing the sperm motility data, the next step is to use a generalised lienar regression model to assess the effects of MP exposure on sperm motility. For these analyses all models had a binomial error distribution to account for the fact that the data were proportions, ranging between 0 -- 1. We allso included random intercepts to account for differences between the different bulls from which the sperm came, and any differences across replicates.
+
+```{r}
+# Using logistic regression model
+NULL_MOD <- glmer(Motile ~ 1 + (1|bull) + (1|Replicate),
+                  family = binomial,
+                  data = data)
+
+TIME_MOD <- glmer(Motile ~ Time + (1|bull) + (1|Replicate),
+                  family = binomial,
+                  data = data)
+
+TIME_TREAT_MOD <- glmer(Motile ~ Time + Treatment + (1|bull) + (1|Replicate),
+                        family = binomial,
+                        data = data)
+
+#AICc based model selection to identify the best fit model
+AICc(NULL_MOD, TIME_MOD, TIME_TREAT_MOD)
+
+#Summary of the model that includes the effects of time and treatment
+tbl_regression(TIME_TREAT_MOD, intercept= T) %>% add_global_p(keep = T)
+```
+
+These results indicate that although all of the MP exposure treatments tended to have lower motility than the control, these effects were not statistically significant.
+
+
+The final step was to generate a figure of the results
+```{r}
+A <- 
+  ggplot(data = data, 
+         aes(x = Time2,
+             y = Motile,
+             fill = Treatment)) +
+  geom_point(aes(col = Treatment),
+             position = position_jitterdodge(jitter.width = 0.05),
+             size = 0.1) +
+  geom_boxplot(size = 0.2,
+               alpha = 0.5,
+               outlier.size = 0) +
+  scale_fill_manual(labels = c("Control",
+                               "0.05 \U03BCm",
+                               "0.1 \U03BCm",
+                               "0.3 \U03BCm",
+                               "1.1 \U03BCm"),
+                    values = c("black", '#e36b20', '#3471bc', '#dfb433', '#3c7a47'),
+                    guide = "none") +
+  scale_colour_manual(labels = c("Control",
+                                 "0.05 \U03BCm",
+                                 "0.1 \U03BCm",
+                                 "0.3 \U03BCm",
+                                 "1.1 \U03BCm"),
+                      values = c("black", '#e36b20', '#3471bc', '#dfb433', '#3c7a47')) +
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.y = element_text(size=5, family = "sans", face = "bold"),
+        axis.title.x = element_text(size=5, family = "sans", face = "bold"),
+        axis.text.y = element_text(size=4, family = "sans"),
+        axis.text.x  = element_text(size=4, family = "sans"),
+        plot.title = element_text(hjust = -0.05, size = 6, family = "sans", face = "bold"),
+        legend.position = c(0.1,0.2),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 3, family = "sans", face = "bold"),
+        legend.background =  element_rect(fill = "transparent", colour = "transparent"),
+        legend.key = element_rect(fill = "transparent", colour = "transparent"),
+        legend.key.size = unit(0.15, "cm"),
+        legend.key.width = unit(0.2, "cm"),
+        legend.spacing.y = unit(-0.1, "cm"),
+        panel.background = element_rect(fill = "transparent"),
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_y_continuous(limits = c(0,1), expand = c(0,0)) +
+  #scale_x_continuous(limits = c(-15,135), breaks = c(0,30,60,90,120)) +
+  
+  ylab(expression(bold(Proportion~motile))) +
+  xlab(expression(bold(Time~(min))))
+
+A
+```
+
+```{r, include = FALSE}
+#Save the figures
+ggsave(A,
+       width = 5.75, height = 3, units = "in",
+       dpi = 600,
+       bg = "transparent",
+       file="Figures/Motility_Fig.png")
+```
