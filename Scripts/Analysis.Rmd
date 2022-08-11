@@ -28,17 +28,20 @@ The \texttt{R} packages used in these analyses are detailed below. Package versi
 ```{r}
 # Packages used in the analyses
 library(lme4)
+library(MASS)
+library(multcomp)
 library(MuMIn)
 library(gtsummary)
 library(ggplot2)
+library(knitr)
 ```
 
 * * *
 # Sperm
-The first step was to assess the effects of microplastics exposure on sperm survival. This was done using generalised linear regression models with a binomial error distribution.
+The first step was to assess the effects of microplastics (MPs) exposure on sperm  This was done using generalised linear regression models with binomial error distributions to determine the extent to which exposure to MPs influenced motility and acrosomal integrity.
 
 
-## Effects of MPs on sperm motility
+## Effects of MPs on motility
 
 The first step was to import the sperm motility data and carry out some basic data carpentry in order to get the data in the correct format for analysis.
 ```{r}
@@ -70,10 +73,25 @@ data[which(data$Treatment == "B0.1"),"Treatment"] <- "MP_0.1"
 data <- data[which(data$Time !=30),]
 ```
 
-After importing and preparing the sperm motility data, the next step is to use a generalised lienar regression model to assess the effects of MP exposure on sperm motility. For these analyses all models had a binomial error distribution to account for the fact that the data were proportions, ranging between 0 -- 1. We allso included random intercepts to account for differences between the different bulls from which the sperm came, and any differences across replicates.
+After importing and preparing the sperm motility data, the next step was to obtain some basic summary statistics about the data.
 
 ```{r}
-# Using logistic regression model
+# Mean motility by treatment and time
+means <- aggregate(Motile ~ Time*Treatment, data = data, FUN = "mean")
+
+# SDs by treatment and time
+sds <- aggregate(Motile ~ Time*Treatment, data = data, FUN = "sd")
+
+means$SD <- sds$Motile
+names(means)[3] <- c("Mean")
+
+kable(means, format="markdown", digits = 3, align = "c", caption = "Basic summary statistics on the sperm motility data.")
+```
+
+Next, we used generalised linear regression models to assess the effects of MP exposure on sperm motility. For these analyses all models had a binomial error distribution to account for the fact that the data were proportions, ranging between 0 -- 1. We also included random intercepts to account for differences between the different bulls from which the sperm came, and any differences across replicates.
+
+```{r, warning=FALSE, message=FALSE}
+# Fit the various logistic regression models
 NULL_MOD <- glmer(Motile ~ 1 + (1|bull) + (1|Replicate),
                   family = binomial,
                   data = data)
@@ -93,22 +111,25 @@ AICc(NULL_MOD, TIME_MOD, TIME_TREAT_MOD)
 tbl_regression(TIME_TREAT_MOD, intercept= T) %>% add_global_p(keep = T)
 ```
 
-These results indicate that although all of the MP exposure treatments tended to have lower motility than the control, these effects were not statistically significant.
+<br>
 
+These results indicate that although all of the MP exposure treatments tended to have lower motility than the control, these effects were not statistically significant. A figure of the results is shown below. Note: For the sake of brevity, the code used to generate the figure are not shown here.
 
-The final step was to generate a figure of the results
-```{r}
+<br>
+
+```{r, echo = FALSE, fig.cap="Figure S1 Boxplots depicting sperm motility over time as a function of microplastics treatment.", fig.align="center"}
 A <- 
   ggplot(data = data, 
          aes(x = Time2,
-             y = Motile,
+             y = Motile*100,
              fill = Treatment)) +
   geom_point(aes(col = Treatment),
              position = position_jitterdodge(jitter.width = 0.05),
              size = 0.1) +
   geom_boxplot(size = 0.2,
                alpha = 0.5,
-               outlier.size = 0) +
+               outlier.size = 0,
+               outlier.shape = NA) +
   scale_fill_manual(labels = c("Control",
                                "0.05 \U03BCm",
                                "0.1 \U03BCm",
@@ -132,7 +153,7 @@ A <-
         plot.title = element_text(hjust = -0.05, size = 6, family = "sans", face = "bold"),
         legend.position = c(0.1,0.2),
         legend.title = element_blank(),
-        legend.text = element_text(size = 3, family = "sans", face = "bold"),
+        legend.text = element_text(size = 4, family = "sans", face = "bold"),
         legend.background =  element_rect(fill = "transparent", colour = "transparent"),
         legend.key = element_rect(fill = "transparent", colour = "transparent"),
         legend.key.size = unit(0.15, "cm"),
@@ -140,10 +161,10 @@ A <-
         legend.spacing.y = unit(-0.1, "cm"),
         panel.background = element_rect(fill = "transparent"),
         plot.background = element_rect(fill = "transparent", color = NA)) +
-  scale_y_continuous(limits = c(0,1), expand = c(0,0)) +
+  scale_y_continuous(limits = c(0,100), expand = c(0,0)) +
   #scale_x_continuous(limits = c(-15,135), breaks = c(0,30,60,90,120)) +
   
-  ylab(expression(bold(Proportion~motile))) +
+  ylab(expression(bold(Percent~motile~"(%)"))) +
   xlab(expression(bold(Time~(min))))
 
 A
@@ -156,4 +177,489 @@ ggsave(A,
        dpi = 600,
        bg = "transparent",
        file="Figures/Motility_Fig.png")
+```
+
+
+
+
+## Effects of MPs on acrosomal integrity
+
+The first step was to import the sperm acrosomal integrity data and carry out some basic data carpentry in order to get the data in the correct format for analysis.
+
+```{r}
+# Import the sperm motility data
+data <- read.csv("Data/Acrosome.csv")
+
+# Scale percentages between 0-1 for the binomial model
+data$acrosome2 <- data$acrosome/100
+
+# Convert the arbitrary time points to minutes since start of the experiment
+data[which(data$Time == 0.5),"Time"] <- 30
+data[which(data$Time == 1),"Time"] <- 60
+data[which(data$Time == 1.5),"Time"] <- 90
+data[which(data$Time == 2),"Time"] <- 120
+
+# Convert time to a factor for plotting purposes only
+data$Time2 <- as.factor(data$Time)
+
+# Rename the groups
+data[which(data$Treatment == "CT"),"Treatment"] <- "Control"
+data[which(data$Treatment == "B0.3"),"Treatment"] <- "MP_0.3"
+data[which(data$Treatment == "B1.1"),"Treatment"] <- "MP_1.1"
+data[which(data$Treatment == "B0.05"),"Treatment"] <- "MP_0.05"
+data[which(data$Treatment == "B0.1"),"Treatment"] <- "MP_0.1"
+
+# Drop a time point with questionable data
+data <- data[which(data$Time !=30),]
+```
+
+After importing and preparing the sperm acrosomal integrity data, the next step was to obtain some basic summary statistics about the data.
+
+```{r}
+# Mean acrosomal integrity by treatment and time
+means <- aggregate(acrosome2 ~ Time*Treatment, data = data, FUN = "mean")
+
+# SDs by treatment and time
+sds <- aggregate(acrosome2 ~ Time*Treatment, data = data, FUN = "sd")
+
+means$SD <- sds$acrosome2
+names(means)[3] <- c("Mean")
+
+kable(means, format="markdown", digits = 3, align = "c", caption = "Basic summary statistics on the sperm acrosomal integrity data.")
+```
+
+Next we used generalised linear regression models to assess the effects of MP exposure on acrosomal integrity. For these analyses all models had a binomial error distribution to account for the fact that the data were percentages, ranging between 0 -- 1. We also included random intercepts to account for differences between the different bulls from which the sperm came, and any differences across replicates.
+
+```{r, warning=FALSE, message=FALSE}
+# Fit the various logistic regression models
+NULL_MOD <- glmer(acrosome2 ~ 1 + (1|bull) + (1|Replicate),
+                  family = binomial,
+                  data = data)
+
+TIME_MOD <- glmer(acrosome2 ~ Time + (1|bull) + (1|Replicate),
+                  family = binomial,
+                  data = data)
+
+TIME_TREAT_MOD <- glmer(acrosome2 ~ Time + Treatment + (1|bull) + (1|Replicate),
+                        family = binomial,
+                        data = data)
+
+#AICc based model selection to identify the best fit model
+AICc(NULL_MOD, TIME_MOD, TIME_TREAT_MOD)
+
+#Summary of the model that includes the effects of time and treatment
+tbl_regression(TIME_TREAT_MOD, intercept= T) %>% add_global_p(keep = T)
+```
+
+<br>
+
+These results indicate that all of the sperm cells exposed to MPs tended to have significantly lower acrosomal integrity than the control .A figure of the results is shown below. Note: Here again the code used to generate the figure are not shown.
+
+<br>
+
+
+```{r, echo = FALSE, fig.cap="Figure S2 Boxplots depicting sperm acrosomal integrity over time as a function of microplastics treatment.", fig.align="center"}
+
+A <- 
+  ggplot(data = data, 
+         aes(x = Time2,
+             y = acrosome,
+             fill = Treatment)) +
+  geom_point(aes(col = Treatment),
+             position = position_jitterdodge(jitter.width = 0.05),
+             size = 0.1) +
+  geom_boxplot(size = 0.2,
+               alpha = 0.5,
+               outlier.size = 0,
+               outlier.shape = NA) +
+  scale_fill_manual(labels = c("Control",
+                               "0.05 \U03BCm",
+                               "0.1 \U03BCm",
+                               "0.3 \U03BCm",
+                               "1.1 \U03BCm"),
+                    values = c("black", '#e36b20', '#3471bc', '#dfb433', '#3c7a47'),
+                    guide = "none") +
+  scale_colour_manual(labels = c("Control",
+                                 "0.05 \U03BCm",
+                                 "0.1 \U03BCm",
+                                 "0.3 \U03BCm",
+                                 "1.1 \U03BCm"),
+                      values = c("black", '#e36b20', '#3471bc', '#dfb433', '#3c7a47')) +
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.y = element_text(size=5, family = "sans", face = "bold"),
+        axis.title.x = element_text(size=5, family = "sans", face = "bold"),
+        axis.text.y = element_text(size=4, family = "sans"),
+        axis.text.x  = element_text(size=4, family = "sans"),
+        plot.title = element_text(hjust = -0.05, size = 6, family = "sans", face = "bold"),
+        legend.position = c(0.1,0.2),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 4, family = "sans", face = "bold"),
+        legend.background =  element_rect(fill = "transparent", colour = "transparent"),
+        legend.key = element_rect(fill = "transparent", colour = "transparent"),
+        legend.key.size = unit(0.15, "cm"),
+        legend.key.width = unit(0.2, "cm"),
+        legend.spacing.y = unit(-0.1, "cm"),
+        panel.background = element_rect(fill = "transparent"),
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_y_continuous(limits = c(0,100), expand = c(0,0)) +
+  #scale_x_continuous(limits = c(-15,135), breaks = c(0,30,60,90,120)) +
+  
+  ylab(expression(bold(Acrosomal~integrity~"(%)"))) +
+  xlab(expression(bold(Time~(min))))
+
+A
+```
+
+```{r, include = FALSE}
+#Save the figures
+ggsave(A,
+       width = 5.75, height = 3, units = "in",
+       dpi = 600,
+       bg = "transparent",
+       file="Figures/Acrosome_Fig.png")
+```
+
+
+
+## Effects of MPs on oxidative stress
+
+The first step was to import the sperm oxidative stress data and carry out some basic data carpentry in order to get the data in the correct format for analysis.
+
+```{r}
+# Import the sperm motility data
+data <- read.csv("Data/CR.csv")
+
+# Scale percentages between 0-1 for the binomial model
+data$CR2 <- data$CR/100
+
+# Convert the arbitrary time points to minutes since start of the experiment
+data[which(data$Time == 0.5),"Time"] <- 30
+data[which(data$Time == 1),"Time"] <- 60
+data[which(data$Time == 1.5),"Time"] <- 90
+data[which(data$Time == 2),"Time"] <- 120
+data[which(data$Time == 3),"Time"] <- 180
+
+# Convert time to a factor for plotting purposes only
+data$Time2 <- as.factor(data$Time)
+
+# Rename the groups
+data[which(data$Treatment == "CT"),"Treatment"] <- "Control"
+data[which(data$Treatment == "CT+"),"Treatment"] <- "Control_Positive"
+data[which(data$Treatment == "b0.3"),"Treatment"] <- "MP_0.3"
+data[which(data$Treatment == "b1.1"),"Treatment"] <- "MP_1.1"
+data[which(data$Treatment == "b0.05"),"Treatment"] <- "MP_0.05"
+data[which(data$Treatment == "b0.1"),"Treatment"] <- "MP_0.1"
+data$Treatment <- as.factor(data$Treatment)
+```
+
+After importing and preparing the oxidative stress data, the next step was to obtain some basic summary statistics.
+
+```{r}
+# Mean acrosomal integrity by treatment and time
+means <- aggregate(CR2 ~ Time*Treatment, data = data, FUN = "mean")
+
+# SDs by treatment and time
+sds <- aggregate(CR2 ~ Time*Treatment, data = data, FUN = "sd")
+
+means$SD <- sds$CR2
+names(means)[3] <- c("Mean")
+
+kable(means, format="markdown", digits = 3, align = "c", caption = "Basic summary statistics on the sperm oxidative stress data.")
+```
+
+After an initial visual verification, we found that we needed to assess whether there was any evidence of under/overdispersion in the data. This was done by estimating the dispersion parameter of the data. 
+
+
+```{r, warning=FALSE, message=FALSE}
+#Test if the data are under/overdispersed
+quasi_binom <- glm(CR2 ~ Treatment + Time, data = data, family=quasibinomial)
+summary(quasi_binom)
+```
+
+These results indicate that the dispersion parameter was `r round(summary(quasi_binom)$dispersion,3)`, suggesting the data were extremely underdispersed. 
+
+<br>
+
+Next we used generalised linear regression models to assess the effects of MP exposure on oxidative stress. For these analyses all models had a binomial error distribution to account for the fact that the data were percentages, ranging between 0 -- 1. We also included random intercepts to account for differences between the different bulls from which the sperm came, and any differences across replicates.
+
+```{r, warning=FALSE, message=FALSE}
+fit.quasi.binom <- MASS::glmmPQL(CR2 ~ Treatment + Time,
+                                 random = ~ 1|Replicate + 1|Bull,
+                                 family=quasibinomial,
+                                 data = data)
+
+#Summary of the model that includes the effects of time and treatment
+tbl_regression(fit.quasi.binom, intercept= T) %>% add_global_p(keep = T)
+
+# Tukey post-hoc test
+TUKEY <- glht(fit.quasi.binom,
+                  mcp(Treatment = "Tukey"),
+                  data = data)
+summary(TUKEY)
+```
+
+<br>
+
+These results indicate that all of the sperm cells exposed to MPs tended to have significantly greater oxidative stress than the control. Tukey post-hoc comparison found that there were no significant difference in oxidative stress between the different size treatments, nor between the MP size treatments and the positive control, except for the largest size beads we examined (1.1 $\mu\mathrm{m}$), which did not result in significantly greater oxidative stress than the negative control. A figure of the results across all three metrics is shown below. Note: Here again the code used to generate the figure are not shown.
+
+<br>
+
+
+```{r, echo = FALSE, warning=FALSE, fig.cap="Figure S2 Boxplots depicting sperm acrosomal integrity over time as a function of microplastics treatment.", fig.align="center"}
+ 
+A <- 
+  ggplot(data = data, 
+         aes(x = Time2,
+             y = CR,
+             fill = Treatment)) +
+  geom_point(aes(col = Treatment),
+             position = position_jitterdodge(jitter.width = 0.05),
+             size = 0.1) +
+  geom_boxplot(size = 0.2,
+               alpha = 0.5,
+               outlier.size = 0,
+               outlier.shape = NA) +
+  scale_fill_manual(labels = c("Negative control",
+                               "Positive control",
+                               "0.05 \U03BCm",
+                               "0.1 \U03BCm",
+                               "0.3 \U03BCm",
+                               "1.1 \U03BCm"),
+                    values = c("black", "grey70", '#e36b20', '#3471bc', '#dfb433', '#3c7a47'),
+                    guide = "none") +
+  scale_colour_manual(labels = c("Negative control",
+                                 "Positive control",
+                                 "0.05 \U03BCm",
+                                 "0.1 \U03BCm",
+                                 "0.3 \U03BCm",
+                                 "1.1 \U03BCm"),
+                      values = c("black", "grey70", '#e36b20', '#3471bc', '#dfb433', '#3c7a47')) +
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.y = element_text(size=5, family = "sans", face = "bold"),
+        axis.title.x = element_text(size=5, family = "sans", face = "bold"),
+        axis.text.y = element_text(size=4, family = "sans"),
+        axis.text.x  = element_text(size=4, family = "sans"),
+        plot.title = element_text(hjust = -0.05, size = 6, family = "sans", face = "bold"),
+        legend.position = c(0.075,0.9),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 4, family = "sans", face = "bold"),
+        legend.background =  element_rect(fill = "transparent", colour = "transparent"),
+        legend.key = element_rect(fill = "transparent", colour = "transparent"),
+        legend.key.size = unit(0.15, "cm"),
+        legend.key.width = unit(0.2, "cm"),
+        legend.spacing.y = unit(-0.1, "cm"),
+        panel.background = element_rect(fill = "transparent"),
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_y_continuous(limits = c(0,50), expand = c(0,1)) +
+  #scale_x_continuous(limits = c(-15,135), breaks = c(0,30,60,90,120)) +
+  
+  ylab(expression(bold(Cellrox~positive~"(%)"))) +
+  xlab(expression(bold(Time~(min))))
+
+A
+```
+
+```{r, include = FALSE}
+#Save the figures
+ggsave(A,
+       width = 5.75, height = 3, units = "in",
+       dpi = 600,
+       bg = "transparent",
+       file="Figures/Redox_Fig.png")
+```
+
+
+
+* * *
+# Oocytes
+
+The next step in the analyses was to assess the effects of MPs exposure on oocytes.
+
+
+## Effects of MPs on maturation
+
+The first step was to import the oocyte maturation data and carry out some basic data carpentry in order to get the data in the correct format for analysis.
+
+```{r}
+# Import the sperm motility data
+data <- read.csv("Data/Oocyte_data.csv")
+
+# Scale percentages between 0-1 for the binomial model
+data$Percentage2 <- data$Percentage/100
+
+# Rename the groups
+data[which(data$Treatment == "CT"),"Treatment"] <- "Control"
+data[which(data$Treatment == "B0.3"),"Treatment"] <- "MP_0.3"
+data[which(data$Treatment == "B1.1"),"Treatment"] <- "MP_1.1"
+data[which(data$Treatment == "B0.05"),"Treatment"] <- "MP_0.05"
+data[which(data$Treatment == "B0.1"),"Treatment"] <- "MP_0.1"
+
+#Convert to factors
+data$Treatment <- as.factor(data$Treatment)
+data$Nuclear_stage <- factor(data$Nuclear_stage, ordered = T, levels = c("BZP", "DG", "MT"))
+data$replicate <- as.factor(data$Replicate)
+```
+
+After importing and preparing the data, the next step was to obtain some basic summary statistics.
+
+```{r}
+# Mean acrosomal integrity by treatment and time
+means <- aggregate(Percentage2 ~ Nuclear_stage*Treatment, data = data, FUN = "mean")
+
+# SDs by treatment and time
+sds <- aggregate(Percentage2 ~ Nuclear_stage*Treatment, data = data, FUN = "sd")
+
+means$SD <- sds$Percentage2
+names(means)[3] <- c("Mean")
+
+kable(means, format="markdown", digits = 3, align = "c", caption = "Basic summary statistics on the oocyte data.")
+```
+
+After an initial visual verification, we found that we needed to assess whether there was any evidence of under/overdispersion in the data. This was done by estimating the dispersion parameter of the data. 
+
+
+```{r, warning=FALSE, message=FALSE}
+#Test if the data are under/overdispersed
+quasi_binom <- glm(Percentage2 ~ Treatment + Nuclear_stage, data = data, family=quasibinomial)
+summary(quasi_binom)
+```
+
+These results indicate that the dispersion parameter was `r round(summary(quasi_binom)$dispersion,3)`.
+
+### Mature cells
+We used generalised linear regression models to assess the effects of MP exposure on the percentage of mature oocytes after a 24 hour maturation period. For these analyses all models had a quasi-binomial error distribution to account for the fact that the data were underdispersed percentages, ranging between 0 -- 1. We also included random intercepts to account for any differences across replicates.
+
+
+```{r, warning=FALSE, message=FALSE}
+MT.fit <- glmmPQL(Percentage2 ~ Treatment,
+                  random = ~ 1|Replicate,
+                  family=quasibinomial,
+                  data = data[which(data$Nuclear_stage == "MT"),])
+
+summary(MT.fit)
+
+# Tukey post-hoc test
+MT.TUKEY <- glht(MT.fit,
+                 mcp(Treatment = "Tukey"),
+                 data = data[which(data$Nuclear_stage == "MT"),])
+summary(MT.TUKEY)
+```
+
+
+<br>
+
+These results indicate that exposure to MPs resulted in significantly reduced oocyte maturation rates compared to the control. A Tukey post-hoc comparison found that while exposure to both the 0.3 $\mu\mathrm{m}$ and 1.1 $\mu\mathrm{m}$ MP beads resulted in significantly lower maturation rates than the control, there was no significant difference between the two sized beads. 
+
+
+### Degraded cells
+We used generalised linear regression models to assess the effects of MP exposure on the percentage of degraded oocytes after a 24 hour maturation period. For these analyses all models had a quasi-binomial error distribution to account for the fact that the data were underdispersed percentages, ranging between 0 -- 1. We also included random intercepts to account for any differences across replicates.
+
+
+```{r, warning=FALSE, message=FALSE}
+DG.fit <- glmmPQL(Percentage2 ~ Treatment,
+                  random = ~ 1|Replicate,
+                  family=quasibinomial,
+                  data = data[which(data$Nuclear_stage == "DG"),])
+
+summary(DG.fit)
+
+# Tukey post-hoc test
+DG.TUKEY <- glht(DG.fit,
+                 mcp(Treatment = "Tukey"),
+                 data = data[which(data$Nuclear_stage == "DG"),])
+summary(DG.TUKEY)
+```
+
+
+<br>
+
+These results indicate that exposure to MPs tended to result in a higher percentage of degraded oocyte compared to the control, but the effects were not statistically significant. A Tukey post-hoc comparison found no evidence of any pair-wise differences. 
+
+
+### Broken zona pellucidae
+We used generalised linear regression models to assess the effects of MP exposure on the percentage of oocytes with broken zona pellucidae after a 24 hour maturation period. For these analyses all models had a quasi-binomial error distribution to account for the fact that the data were underdispersed percentages, ranging between 0 -- 1. We also included random intercepts to account for any differences across replicates.
+
+
+```{r, warning=FALSE, message=FALSE}
+BZP.fit <- glmmPQL(Percentage2 ~ Treatment,
+                   random = ~ 1|Replicate,
+                   family=quasibinomial,
+                   data = data[which(data$Nuclear_stage == "BZP"),])
+
+summary(BZP.fit)
+
+# Tukey post-hoc test
+BZP.TUKEY <- glht(BZP.fit,
+                  mcp(Treatment = "Tukey"),
+                  data = data[which(data$Nuclear_stage == "BZP"),])
+summary(BZP.TUKEY)
+```
+
+
+<br>
+
+These results indicate that exposure to MPs resulted in a significantly higher percentage of oocytes with broken zona pellucidae after a 24 hour maturation period compared to the control. A Tukey post-hoc comparison found that while exposure to both the 0.3 $\mu\mathrm{m}$ and 1.1 $\mu\mathrm{m}$ MP beads resulted in significantly more broken zona pellucidae than the control, there was no significant difference in the number of broken zona pellucidae between the two size treatments. A figure of the results across all three metrics is shown below. Note: Here again the code used to generate the figure are not shown.
+
+<br>
+
+```{r, echo = FALSE, fig.cap="Figure S3 Boxplots depicting oocyte mature over time as a function of microplastics treatment.", fig.align="center"}
+
+A <- 
+  ggplot(data = data, 
+         aes(x = Nuclear_stage,
+             y = Percentage,
+             fill = Treatment)) +
+  geom_point(aes(col = Treatment),
+             position = position_jitterdodge(jitter.width = 0.05),
+             size = 0.1) +
+  geom_boxplot(size = 0.2,
+               alpha = 0.5,
+               outlier.size = 0,
+               outlier.shape = NA) +
+  scale_fill_manual(labels = c("Control",
+                               "0.3 \U03BCm",
+                               "1.1 \U03BCm"),
+                    values = c("black", '#dfb433', '#3c7a47'),
+                    guide = "none") +
+  scale_colour_manual(labels = c("Control",
+                                 "0.3 \U03BCm",
+                                 "1.1 \U03BCm"),
+                      values = c("black", '#dfb433', '#3c7a47')) +
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.y = element_text(size=5, family = "sans", face = "bold"),
+        axis.title.x = element_blank(),
+        axis.text.y = element_text(size=4, family = "sans"),
+        axis.text.x  = element_text(size=5, family = "sans", face = "bold"),
+        plot.title = element_text(hjust = -0.05, size = 6, family = "sans", face = "bold"),
+        legend.position = c(0.1,0.8),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 4, family = "sans", face = "bold"),
+        legend.background =  element_rect(fill = "transparent", colour = "transparent"),
+        legend.key = element_rect(fill = "transparent", colour = "transparent"),
+        legend.key.size = unit(0.15, "cm"),
+        legend.key.width = unit(0.2, "cm"),
+        legend.spacing.y = unit(-0.1, "cm"),
+        panel.background = element_rect(fill = "transparent"),
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_y_continuous(limits = c(0,100), expand = c(0,1)) +
+  scale_x_discrete(breaks = c("BZP", "DG", "MT"), labels = c("Broken zona pellucidae", "Degraded", "Mature")) +
+  
+  ylab(expression(bold(Percentage~of~oocytes~"(%)")))
+
+A
+```
+
+```{r, include = FALSE}
+#Save the figures
+ggsave(A,
+       width = 5.75, height = 3, units = "in",
+       dpi = 600,
+       bg = "transparent",
+       file="Figures/Oocyte_Fig.png")
 ```
