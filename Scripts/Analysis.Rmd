@@ -811,7 +811,7 @@ We also wanted to visualise the different plastic polymers that were identified 
 # Import the plastic particle data
 data <- read.csv("Data/General numbers2.csv")
 data <- data[-which(data$Classification == "Non-plastic related"),]
-data2 <- read.csv("Data/MP_fluids_2.csv")
+data2 <- read.csv("Data/MP_fluids.csv")
 ```
 
 
