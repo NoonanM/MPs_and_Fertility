@@ -13,7 +13,7 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, fig.width=6, fig.height=4)
-knitr::opts_knit$set(root.dir = "/Users/mikenoonan/Dropbox/UBC/Side_Projects/MPs_and_Fertility")
+knitr::opts_knit$set(root.dir = "/Users/michaelnoonan/Dropbox (Personal)/UBC/Side_Projects/MPs_and_Fertility")
 ```
 This script was last updated on `r format(Sys.time(), '%B %d, %Y')`.
 
@@ -34,6 +34,8 @@ library(MuMIn)
 library(gtsummary)
 library(ggplot2)
 library(knitr)
+library(ggrepel)
+library(VennDiagram)
 ```
 
 * * *
@@ -146,14 +148,14 @@ A <-
   theme_bw()+
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        axis.title.y = element_text(size=5, family = "sans", face = "bold"),
-        axis.title.x = element_text(size=5, family = "sans", face = "bold"),
-        axis.text.y = element_text(size=4, family = "sans"),
-        axis.text.x  = element_text(size=4, family = "sans"),
-        plot.title = element_text(hjust = -0.05, size = 6, family = "sans", face = "bold"),
+        axis.title.y = element_text(size=10, family = "sans", face = "bold"),
+        axis.title.x = element_text(size=10, family = "sans", face = "bold"),
+        axis.text.y = element_text(size=8, family = "sans"),
+        axis.text.x  = element_text(size=8, family = "sans"),
+        plot.title = element_text(hjust = -0.05, size = 10, family = "sans", face = "bold"),
         legend.position = c(0.1,0.2),
         legend.title = element_blank(),
-        legend.text = element_text(size = 4, family = "sans", face = "bold"),
+        legend.text = element_text(size = 8, family = "sans", face = "bold"),
         legend.background =  element_rect(fill = "transparent", colour = "transparent"),
         legend.key = element_rect(fill = "transparent", colour = "transparent"),
         legend.key.size = unit(0.15, "cm"),
@@ -288,14 +290,14 @@ A <-
   theme_bw()+
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        axis.title.y = element_text(size=5, family = "sans", face = "bold"),
-        axis.title.x = element_text(size=5, family = "sans", face = "bold"),
-        axis.text.y = element_text(size=4, family = "sans"),
-        axis.text.x  = element_text(size=4, family = "sans"),
-        plot.title = element_text(hjust = -0.05, size = 6, family = "sans", face = "bold"),
+        axis.title.y = element_text(size=10, family = "sans", face = "bold"),
+        axis.title.x = element_text(size=10, family = "sans", face = "bold"),
+        axis.text.y = element_text(size=8, family = "sans"),
+        axis.text.x  = element_text(size=8, family = "sans"),
+        plot.title = element_text(hjust = -0.05, size = 10, family = "sans", face = "bold"),
         legend.position = c(0.1,0.2),
         legend.title = element_blank(),
-        legend.text = element_text(size = 4, family = "sans", face = "bold"),
+        legend.text = element_text(size = 8, family = "sans", face = "bold"),
         legend.background =  element_rect(fill = "transparent", colour = "transparent"),
         legend.key = element_rect(fill = "transparent", colour = "transparent"),
         legend.key.size = unit(0.15, "cm"),
@@ -303,7 +305,7 @@ A <-
         legend.spacing.y = unit(-0.1, "cm"),
         panel.background = element_rect(fill = "transparent"),
         plot.background = element_rect(fill = "transparent", color = NA)) +
-  scale_y_continuous(limits = c(0,100), expand = c(0,0)) +
+  scale_y_continuous(limits = c(0,140), breaks = c(0,25,50,75,100), expand = c(0,0)) +
   #scale_x_continuous(limits = c(-15,135), breaks = c(0,30,60,90,120)) +
   
   ylab(expression(bold(Acrosomal~integrity~"(%)"))) +
@@ -395,8 +397,8 @@ tbl_regression(fit.quasi.binom, intercept= T) %>% add_global_p(keep = T)
 
 # Tukey post-hoc test
 TUKEY <- glht(fit.quasi.binom,
-                  mcp(Treatment = "Tukey"),
-                  data = data)
+              mcp(Treatment = "Tukey"),
+              data = data)
 summary(TUKEY)
 ```
 
@@ -407,8 +409,8 @@ These results indicate that all of the sperm cells exposed to MPs tended to have
 <br>
 
 
-```{r, echo = FALSE, warning=FALSE, fig.cap="Figure S2 Boxplots depicting sperm acrosomal integrity over time as a function of microplastics treatment.", fig.align="center"}
- 
+```{r, echo = FALSE, warning=FALSE, fig.cap="Figure S3 Boxplots depicting sperm oxidative stress over time as a function of microplastics treatment.", fig.align="center"}
+
 A <- 
   ggplot(data = data, 
          aes(x = Time2,
@@ -439,14 +441,14 @@ A <-
   theme_bw()+
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        axis.title.y = element_text(size=5, family = "sans", face = "bold"),
-        axis.title.x = element_text(size=5, family = "sans", face = "bold"),
-        axis.text.y = element_text(size=4, family = "sans"),
-        axis.text.x  = element_text(size=4, family = "sans"),
-        plot.title = element_text(hjust = -0.05, size = 6, family = "sans", face = "bold"),
-        legend.position = c(0.075,0.9),
+        axis.title.y = element_text(size=10, family = "sans", face = "bold"),
+        axis.title.x = element_text(size=10, family = "sans", face = "bold"),
+        axis.text.y = element_text(size=8, family = "sans"),
+        axis.text.x  = element_text(size=8, family = "sans"),
+        plot.title = element_text(hjust = -0.05, size = 10, family = "sans", face = "bold"),
+        legend.position = c(0.1,0.87),
         legend.title = element_blank(),
-        legend.text = element_text(size = 4, family = "sans", face = "bold"),
+        legend.text = element_text(size = 7, family = "sans", face = "bold"),
         legend.background =  element_rect(fill = "transparent", colour = "transparent"),
         legend.key = element_rect(fill = "transparent", colour = "transparent"),
         legend.key.size = unit(0.15, "cm"),
@@ -454,7 +456,7 @@ A <-
         legend.spacing.y = unit(-0.1, "cm"),
         panel.background = element_rect(fill = "transparent"),
         plot.background = element_rect(fill = "transparent", color = NA)) +
-  scale_y_continuous(limits = c(0,50), expand = c(0,1)) +
+  scale_y_continuous(limits = c(0,75), expand = c(0,1)) +
   #scale_x_continuous(limits = c(-15,135), breaks = c(0,30,60,90,120)) +
   
   ylab(expression(bold(Cellrox~positive~"(%)"))) +
@@ -472,6 +474,141 @@ ggsave(A,
        file="Figures/Redox_Fig.png")
 ```
 
+
+## MP bead attachment
+
+The first step was to import the MP bead attachement data and carry out some basic data carpentry in order to get the data in the correct format for analysis.
+
+```{r}
+# Import the sperm motility data
+data <- read.csv("Data/beads.csv")
+
+# Scale percentages between 0-1 for the binomial model
+data$beads <- data$Beads_perc/100
+
+# Convert the arbitrary time points to minutes since start of the experiment
+data[which(data$Time == 0.5),"Time"] <- 30
+data[which(data$Time == 1),"Time"] <- 60
+data[which(data$Time == 1.5),"Time"] <- 90
+data[which(data$Time == 2),"Time"] <- 120
+data[which(data$Time == 3),"Time"] <- 180
+
+# Convert time to a factor for plotting purposes only
+data$Time2 <- as.factor(data$Time)
+
+# Rename the groups
+data[which(data$Treatment == "CT"),"Treatment"] <- "Control"
+data[which(data$Treatment == "CT+"),"Treatment"] <- "Control_Positive"
+data[which(data$Treatment == "b0.3"),"Treatment"] <- "MP_0.3"
+data[which(data$Treatment == "b1.1"),"Treatment"] <- "MP_1.1"
+data[which(data$Treatment == "b0.05"),"Treatment"] <- "MP_0.05"
+data[which(data$Treatment == "b0.1"),"Treatment"] <- "MP_0.1"
+data$Treatment <- as.factor(data$Treatment)
+```
+
+After importing and preparing the oxidative stress data, the next step was to obtain some basic summary statistics.
+
+```{r}
+# Mean acrosomal integrity by treatment and time
+means <- aggregate(beads ~ Time*Treatment, data = data, FUN = "mean")
+
+# SDs by treatment and time
+sds <- aggregate(beads ~ Time*Treatment, data = data, FUN = "sd")
+
+means$SD <- sds$beads
+names(means)[3] <- c("Mean")
+
+kable(means, format="markdown", digits = 3, align = "c", caption = "Basic summary statistics on MP attachment.")
+```
+
+After an initial visual verification, we found that we needed to assess whether there was any evidence of under/overdispersion in the data. This was done by estimating the dispersion parameter of the data. 
+
+
+```{r, warning=FALSE, message=FALSE}
+#Test if the data are under/overdispersed
+quasi_binom <- glm(beads ~ Treatment + Time, data = data, family=quasibinomial)
+summary(quasi_binom)
+```
+
+These results indicate that the dispersion parameter was `r round(summary(quasi_binom)$dispersion,3)`, suggesting the data were extremely underdispersed. 
+
+<br>
+
+Next we used generalised linear regression models to assess MP bead attachemnt. For these analyses all models had a binomial error distribution to account for the fact that the data were percentages, ranging between 0 -- 1. We also included random intercepts to account for differences between the different bulls from which the sperm came, and any differences across replicates.
+
+```{r, warning=FALSE, message=FALSE}
+fit.quasi.binom <- MASS::glmmPQL(beads ~ Treatment + Time,
+                                 random = ~ 1|Replicate + 1|Bull,
+                                 family=quasibinomial,
+                                 data = data)
+
+#Summary of the model that includes the effects of time and treatment
+tbl_regression(fit.quasi.binom, intercept= T) %>% add_global_p(keep = T)
+```
+
+<br>
+
+These results indicate that MPs bead attachment did not differ over time, but that the smaller 0.3 $\mu\mathrm{m}$ beads had significantly higher attachment rates than the larger, 1.1 $\mu\mathrm{m}$, beads. A figure of the results across all three metrics is shown below. Note: Here again the code used to generate the figure are not shown.
+
+<br>
+
+
+```{r, echo = FALSE, warning=FALSE, fig.cap="Figure S4 Boxplots depicting the percentage of sperm with attached MP beads over time as a function of MP bead size.", fig.align="center"}
+
+A <- 
+  ggplot(data = data, 
+         aes(x = Time2,
+             y = beads*100,
+             fill = Treatment)) +
+  geom_point(aes(col = Treatment),
+             position = position_jitterdodge(jitter.width = 0.05),
+             size = 0.1) +
+  geom_boxplot(size = 0.2,
+               alpha = 0.5,
+               outlier.size = 0,
+               outlier.shape = NA) +
+  scale_fill_manual(labels = c("0.3 \U03BCm",
+                               "1.1 \U03BCm"),
+                    values = c('#dfb433', '#3c7a47'),
+                    guide = "none") +
+  scale_colour_manual(labels = c("0.3 \U03BCm",
+                                 "1.1 \U03BCm"),
+                      values = c('#dfb433', '#3c7a47')) +
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.y = element_text(size=10, family = "sans", face = "bold"),
+        axis.title.x = element_text(size=10, family = "sans", face = "bold"),
+        axis.text.y = element_text(size=8, family = "sans"),
+        axis.text.x  = element_text(size=8, family = "sans"),
+        plot.title = element_text(hjust = -0.05, size = 10, family = "sans", face = "bold"),
+        legend.position = c(0.85,0.8),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 7, family = "sans", face = "bold"),
+        legend.background =  element_rect(fill = "transparent", colour = "transparent"),
+        legend.key = element_rect(fill = "transparent", colour = "transparent"),
+        legend.key.size = unit(0.15, "cm"),
+        legend.key.width = unit(0.2, "cm"),
+        legend.spacing.y = unit(-0.1, "cm"),
+        panel.background = element_rect(fill = "transparent"),
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_y_continuous(limits = c(0,30), expand = c(0,1)) +
+  #scale_x_continuous(limits = c(-15,135), breaks = c(0,30,60,90,120)) +
+  
+  ylab(expression(bold(Sperm~with~attached~MPs~"(%)"))) +
+  xlab(expression(bold(Time~(min))))
+
+A
+```
+
+```{r, include = FALSE}
+#Save the figures
+ggsave(A,
+       width = 5.75, height = 3, units = "in",
+       dpi = 600,
+       bg = "transparent",
+       file="Figures/Attachment_Fig.png")
+```
 
 
 * * *
@@ -606,7 +743,7 @@ These results indicate that exposure to MPs resulted in a significantly higher p
 
 <br>
 
-```{r, echo = FALSE, fig.cap="Figure S3 Boxplots depicting oocyte mature over time as a function of microplastics treatment.", fig.align="center"}
+```{r, echo = FALSE, fig.cap="Figure S5 Boxplots depicting oocyte mature over time as a function of microplastics treatment.", fig.align="center"}
 
 A <- 
   ggplot(data = data, 
@@ -632,14 +769,14 @@ A <-
   theme_bw()+
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
-        axis.title.y = element_text(size=5, family = "sans", face = "bold"),
+        axis.title.y = element_text(size=10, family = "sans", face = "bold"),
         axis.title.x = element_blank(),
-        axis.text.y = element_text(size=4, family = "sans"),
-        axis.text.x  = element_text(size=5, family = "sans", face = "bold"),
-        plot.title = element_text(hjust = -0.05, size = 6, family = "sans", face = "bold"),
-        legend.position = c(0.1,0.8),
+        axis.text.y = element_text(size=8, family = "sans", face = "bold"),
+        axis.text.x  = element_text(size=8, family = "sans"),
+        plot.title = element_text(hjust = -0.05, size = 10, family = "sans", face = "bold"),
+        legend.position = c(0.1,0.8 ),
         legend.title = element_blank(),
-        legend.text = element_text(size = 4, family = "sans", face = "bold"),
+        legend.text = element_text(size = 8, family = "sans", face = "bold"),
         legend.background =  element_rect(fill = "transparent", colour = "transparent"),
         legend.key = element_rect(fill = "transparent", colour = "transparent"),
         legend.key.size = unit(0.15, "cm"),
@@ -662,4 +799,592 @@ ggsave(A,
        dpi = 600,
        bg = "transparent",
        file="Figures/Oocyte_Fig.png")
+```
+
+
+
+### MP presence in follicular fluids
+We also wanted to visualise the different plastic polymers that were identified in bovine follicular fluid samples. Each of these samples came from a pool of follicular fluid collected from different cows, with each sample belonging to a different collection period.
+
+
+```{r}
+# Import the plastic particle data
+data <- read.csv("Data/General numbers2.csv")
+data <- data[-which(data$Classification == "Non-plastic related"),]
+data2 <- read.csv("Data/MP_fluids_2.csv")
+```
+
+
+
+```{r, echo = FALSE, fig.cap="Figure S6 Bar chart depicting the number of plastic particles found in cow follicular fluid samples.", fig.align="center"}
+
+A <- 
+  ggplot(data = data, 
+         aes(x = Sample,
+             y = Count,
+             fill = Classification)) +
+  geom_bar(position = "fill", stat = "identity", alpha = 0.8) +
+  scale_fill_manual(labels = c("Coating, solvent, or filler",
+                               "Pigment",
+                               "Plastic polymer",
+                               "Plasticizer"),
+                    values = c("#00798c", "#d1495b", "#edae49", "#2e4057")) +
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.y = element_text(size=14, family = "sans", face = "bold"),
+        axis.title.x = element_text(size=14, family = "sans", face = "bold"),
+        axis.text.y = element_text(size=12, family = "sans"),
+        axis.text.x  = element_text(size=12, family = "sans"),
+        plot.title = element_text(hjust = -0.05, size = 10, family = "sans", face = "bold"),
+        legend.position = "top",
+        legend.title = element_blank(),
+        legend.text = element_text(size = 10, family = "sans", face = "bold"),
+        legend.background =  element_rect(fill = "transparent", colour = "transparent"),
+        legend.key = element_rect(fill = "transparent", colour = "transparent"),
+        legend.key.size = unit(0.15, "cm"),
+        legend.key.width = unit(0.2, "cm"),
+        legend.spacing.y = unit(-0.1, "cm"),
+        panel.background = element_rect(fill = "transparent"),
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_y_continuous(expand = c(0,0.005)) +
+  scale_x_discrete(breaks = c("FF1", "FF2", "FF3", "WtCTRL1", "WtCTRL2"),
+                   labels = c("FF1", "FF2", "FF3", "Water 1", "Water 2")) +
+  xlab(expression(bold(Sample))) +
+  ylab(expression(bold(Proportion~of~particles~per~mL)))
+
+A
+```
+
+```{r, include = FALSE}
+#Save the figures
+ggsave(A,
+       width = 5.75, height = 4.8, units = "in",
+       dpi = 600,
+       bg = "transparent",
+       file="Figures/MP_Composition.png")
+```
+
+
+```{r, echo = FALSE, fig.cap="Figure S6 Bar chart depicting the number of plastic particles found in cow follicular fluid samples.", fig.align="center"}
+
+A <- 
+  ggplot(data = data2, 
+         aes(x = Sample,
+             y = particles_ml,
+             fill = Microplastic)) +
+  geom_bar(stat = "identity", alpha = 0.8) +
+  scale_fill_manual(labels = c("ABS",
+                               "Cellulose",
+                               "Cotton",
+                               "Nylon",
+                               "Other",
+                               "Polyamide",
+                               "Polyester",
+                               "Polyethylene",
+                               "Polypropoylene",
+                               "Polystyrene",
+                               "Polyvinyl chloride",
+                               "Silicon(IV) oxide"),
+                    values = c("#001219", "#8d96a3", "#005F73", "#0A9396", "#94D2BD",
+                               "#E9D8A6","#EE9B00", "#CA6702",  "#9B2226", "#b56576", "#6d597a", "#355070")) +
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.y = element_text(size=14, family = "sans", face = "bold"),
+        axis.title.x = element_text(size=14, family = "sans", face = "bold"),
+        axis.text.y = element_text(size=12, family = "sans"),
+        axis.text.x  = element_text(size=12, family = "sans"),
+        plot.title = element_text(hjust = -0.05, size = 10, family = "sans", face = "bold"),
+        legend.position = c(0.15,0.7 ),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 10, family = "sans", face = "bold"),
+        legend.background =  element_rect(fill = "transparent", colour = "transparent"),
+        legend.key = element_rect(fill = "transparent", colour = "transparent"),
+        legend.key.size = unit(0.15, "cm"),
+        legend.key.width = unit(0.2, "cm"),
+        legend.spacing.y = unit(-0.1, "cm"),
+        panel.background = element_rect(fill = "transparent"),
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_y_continuous(limits = c(0,320), expand = c(0,1)) +
+  scale_x_discrete(breaks = c("FF1", "FF2", "FF3"), labels = c("FF1", "FF2", "FF3")) +
+  xlab(expression(bold(Follicular~fluid~sample))) +
+  ylab(expression(bold(Number~of~particles~per~mL)))
+
+A
+```
+
+```{r, include = FALSE}
+#Save the figures
+ggsave(A,
+       width = 5.75, height = 4.8, units = "in",
+       dpi = 600,
+       bg = "transparent",
+       file="Figures/FF_Fig.png")
+```
+
+
+
+
+## Proteomics
+
+### Data scaling
+
+The first step was to transform the raw data so that they would be on the same scale. To render the data comparable across species and developmental stages, data were scaled using Probabilistic Quotient Normalisation (PQN; Dieterle et al. 2006), which calibrates individual gene expression profiles against the median profile. Notably, analyses on PQN transformed data have been shown to have low false-positive rates, and can accurately recover groups of interest without introducing artefactual differences (Noonan et al. 2018). 
+
+```{r}
+#Load in the packages
+library(FactoMineR)
+library(ggplot2)
+library(ellipse)
+library(randomForest)
+library(caret)
+library(ggridges)
+library(viridis)
+library(gridExtra)
+library(limma)
+
+
+#Import the raw data
+data <- read.csv("Data/Proteomics_oocyte_MP_raw.csv")
+
+# Some data carpentry
+# Only keep a single one of the multiple IDs
+data$Protein.IDs <- sub(";.*", "", data$Protein.IDs)
+Proteins <- data$Protein.IDs
+
+
+#Identify the gene names
+GN <- sub(".*GN=", "", data$Fasta.headers)
+GN <-  sub(" .*", "", GN)
+GN[grepl( 'tr|', GN, fixed = TRUE)] <- NA
+data$Gene_Name <- GN
+
+#Store the proteins expressed within the different groups
+control <- rowMeans(data[,c("CT_1","CT_2","CT_3","CT_4","CT_5")])
+B0.3 <- rowMeans(data[,c("B0.3_1","B0.3_2","B0.3_3","B0.3_4","B0.3_5")])
+B1.1 <- rowMeans(data[,c("B1.1_1","B1.1_2","B1.1_3","B1.1_4","B1.1_5")])
+
+#Transpose the data and assign the correct column names
+data <- data.frame(t(data[,c(7:21)]))
+colnames(data) <- Proteins
+
+#Store the untransformed data in memory
+raw_data <- data
+
+
+# Create vectors with treatment IDs
+Treatment <- c("1.1", "1.1", "1.1", "control", "0.3", "0.3", "0.3", "1.1", "control", "control", "0.3", "0.3", "control", "control", "1.1")
+Treatment <- as.factor(Treatment)
+
+Treatment_2 <- c("MP", "MP", "MP", "control", "MP", "MP", "MP", "MP", "control", "control", "MP", "MP", "control", "control", "MP")
+Treatment_2 <- as.factor(Treatment_2)
+
+###############################################################
+# PQN Normalisation of the data
+###############################################################
+
+#Calculate the median of each gene's expression to generate a reference sample
+ref <- as.vector(apply(data, 2, median))
+
+for(i in 1:nrow(data)){
+  QUOTIENTS <- data[i,]/ref
+  m_j <- median(t(QUOTIENTS), na.rm = T)
+  data[i,] <- data[i,]/m_j
+  data[i,][data[i,] == min(data[i,])] <- 0
+}
+```
+
+
+### Random Forest Classification
+
+After the data were transformed, a random forest (RF) model was used to classify protein expression profiles according to whether or not the oocytes were exposed to microplastics, with scaled gene expression values as the prediction variables. This allowed us to determine how well information contained within the proteomics data could be used to predict MP exposure. These analyses were conducted using the R package randomForest (RColorBrewer and Liaw, 2018). We chose RF modeling as it does not require any parameter reduction prior to analysis (Cutler et al. 2007). Identification of genes important for classifying groups of interest in each RF model was carried out using RF variable importance values.
+
+
+```{r}
+#Create a dataset that has information on MP exposure vs. controls
+Treatment_Data <- data
+Treatment_Data$Treatment <- Treatment
+
+
+#Run the random forest model identifying MP exposure treatments
+exposure.mod <- randomForest(y = Treatment_Data$Treatment,
+                              x = Treatment_Data[, colnames(Treatment_Data) != "Treatment"],
+                              mtry =  5,
+                              ntree= 20000,
+                              importance=TRUE,
+                              proximity = TRUE,
+                              keep.forest=TRUE,
+                              replace = TRUE)
+
+exposure.mod
+
+
+confusionMatrix(exposure.mod$predicted, Treatment_Data$Treatment)
+
+varImpPlot(exposure.mod, type=1, scale = FALSE)
+```
+
+These results indicate that the RF model was able to classify samples with versus without MP exposure with an accuracy of ca. 65%. However, this did not represent a significant improvement over the null, no-information rate of classification. Figure of these results are depicted below.
+
+
+```{r, echo = FALSE, fig.cap="Figure S7 PCA on the proximity matrix of the RF classification model.", fig.align="center"}
+res.pca <- PCA(exposure.mod$proximity, graph = FALSE) # Conduct a PCA on the proximity matrix
+PC1 <- res.pca$ind$coord[,1] #Store individual coordinates of PC1 as a vector
+PC2 <- res.pca$ind$coord[,2] #Store individual coordinates of PC2 as a vector
+PCs.ID <- data.frame(cbind(PC1,PC2)) #Bind the coordinates together as a dataframe
+PCs.ID$Treatment <- Treatment_Data$Treatment #Add in treatment to the df
+
+#Define axis labels based on % of data explained across each dimension of the PCA
+DIM_1 <- paste("Dim 1 (", round(res.pca$eig[1,2], 1), "%)")
+DIM_2 <- paste("Dim 2 (", round(res.pca$eig[2,2], 1), "%)")
+
+#Draw ellipses around the clusters and highlighting the elipsoids rather than the data points
+centroids <- aggregate(cbind(PC1,PC2)~Treatment,PCs.ID,mean)
+conf.rgn  <- do.call(rbind,lapply(unique(PCs.ID$Treatment),function(t)
+  data.frame(Treatment=as.character(t),
+             ellipse(cov(PCs.ID[PCs.ID$Treatment==t,1:2]),
+                     centre=as.matrix(centroids[t,2:3]),
+                     level=0.95),
+             stringsAsFactors=FALSE)))
+
+#Then make the figure
+PCA_FIG <- 
+  ggplot(PCs.ID, aes(x=PC1, y=PC2, color = Treatment)) +
+  geom_hline(aes(yintercept=0), linetype="dashed", lwd = 0.1) +
+  geom_vline(aes(xintercept=0), linetype="dashed", lwd = 0.1) +
+  geom_path(data=conf.rgn, alpha=0.2, size = 0) +
+  geom_polygon(data=conf.rgn,
+               aes(fill = Treatment),
+               alpha=0.1,
+               size = 0.1,
+               show.legend = FALSE) + 
+  geom_point(size=0.4) +
+  theme_bw() +
+  ylab(DIM_2) +
+  xlab(DIM_1) + 
+  geom_point(size=0.4, aes(color = Treatment)) +
+  scale_fill_manual(labels = c("0.3 \U03BCm",
+                               "1.1 \U03BCm",
+                               "Control"),
+                    values = c('#dfb433', '#3c7a47',"black"),
+                    guide = "none") +
+  scale_colour_manual(labels = c("0.3 \U03BCm",
+                               "1.1 \U03BCm",
+                               "Control"),
+                    values = c('#dfb433', '#3c7a47',"black")) +
+  ylab(DIM_2) +
+  xlab(DIM_1) + 
+    theme_bw()+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          axis.title.y = element_text(size=10, family = "sans", face = "bold"),
+          axis.title.x = element_text(size=10, family = "sans", face = "bold"),
+          axis.text.y = element_text(size=8, family = "sans", face = "bold"),
+          axis.text.x  = element_text(size=8, family = "sans"),
+          plot.title = element_text(hjust = -0.05, size = 10, family = "sans", face = "bold"),
+          legend.position = c(0.1,0.92),
+          legend.title = element_blank(),
+          legend.text = element_text(size = 6, family = "sans", face = "bold"),
+          legend.background =  element_rect(fill = "transparent", colour = "transparent"),
+          legend.key = element_rect(fill = "transparent", colour = "transparent"),
+          legend.key.size = unit(0.15, "cm"),
+          legend.key.width = unit(0.2, "cm"),
+          legend.spacing.y = unit(-0.1, "cm"),
+          panel.background = element_rect(fill = "transparent"),
+          plot.background = element_rect(fill = "transparent", color = NA))
+
+PCA_FIG
+
+ggsave(PCA_FIG,
+       file="Figures/Treatment_PCA.png",
+       width = 3.23,
+       height=3,
+       units = "in",
+       dpi = 600)
+```
+
+```{r, echo = FALSE, fig.cap="Figure S8 Density plots of the variables of primary importance for predicting MP exposure.", fig.align="center"}
+  
+#Get top 20 proteins
+top <- row.names(exposure.mod$importance)[order(exposure.mod$importance[,"MeanDecreaseAccuracy"], decreasing = TRUE)][1:20]
+top
+
+#Figure of the primary genes
+X_LAB <- paste("Scaled", top[1], "Expression")
+
+a <- 
+  ggplot(Treatment_Data, aes(x=Treatment_Data[,top[1]], y=Treatment, fill = Treatment)) +
+  geom_density_ridges(scale = 5, alpha=0.6, size = 0.2) +
+  theme_ridges() +
+  scale_fill_manual(labels = c("0.3 \U03BCm",
+                               "1.1 \U03BCm",
+                               "Control"),
+                    values = c('#dfb433', '#3c7a47',"black"),
+                    guide = "none") +
+  scale_y_discrete(expand = c(0.1, 0), labels=c("0.3 \U03BCm",
+                               "1.1 \U03BCm",
+                               "Control")) +
+  labs(x=X_LAB, y="Treatment") +
+  ggtitle("A") +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.y = element_text(size=10, family = "sans", face = "bold"),
+        axis.title.x = element_text(size=10, family = "sans", face = "bold"),
+        axis.text.y = element_text(size=8, family = "sans", face = "bold"),
+        axis.text.x  = element_text(size=8, family = "sans"),
+        plot.title = element_text(hjust = -0.05, size = 10, family = "sans", face = "bold"),
+        legend.position = "none",
+        legend.title = element_blank(),
+        legend.text = element_text(size = 6, family = "sans", face = "bold"),
+        legend.background =  element_rect(fill = "transparent", colour = "transparent"),
+        legend.key = element_rect(fill = "transparent", colour = "transparent"),
+        legend.key.size = unit(0.15, "cm"),
+        legend.key.width = unit(0.2, "cm"),
+        legend.spacing.y = unit(-0.1, "cm"),
+        panel.background = element_rect(fill = "transparent"),
+        plot.background = element_rect(fill = "transparent", color = NA))
+
+X_LAB <- paste("Scaled", top[2], "Expression")
+
+b <- 
+  ggplot(Treatment_Data, aes(x=Treatment_Data[,top[2]], y=Treatment, fill = Treatment)) +
+  geom_density_ridges(scale = 5, alpha=0.6, size = 0.2) +
+  theme_ridges() +
+  scale_fill_manual(labels = c("0.3 \U03BCm",
+                               "1.1 \U03BCm",
+                               "Control"),
+                    values = c('#dfb433', '#3c7a47',"black"),
+                    guide = "none") +
+  scale_y_discrete(expand = c(0.1, 0), labels=c("0.3 \U03BCm",
+                               "1.1 \U03BCm",
+                               "Control")) +
+  labs(x=X_LAB, y="Treatment") +
+  ggtitle("B") +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.y = element_text(size=10, family = "sans", face = "bold"),
+        axis.title.x = element_text(size=10, family = "sans", face = "bold"),
+        axis.text.y = element_text(size=8, family = "sans", face = "bold"),
+        axis.text.x  = element_text(size=8, family = "sans"),
+        plot.title = element_text(hjust = -0.05, size = 10, family = "sans", face = "bold"),
+        legend.position = "none",
+        legend.title = element_blank(),
+        legend.text = element_text(size = 6, family = "sans", face = "bold"),
+        legend.background =  element_rect(fill = "transparent", colour = "transparent"),
+        legend.key = element_rect(fill = "transparent", colour = "transparent"),
+        legend.key.size = unit(0.15, "cm"),
+        legend.key.width = unit(0.2, "cm"),
+        legend.spacing.y = unit(-0.1, "cm"),
+        panel.background = element_rect(fill = "transparent"),
+        plot.background = element_rect(fill = "transparent", color = NA))
+
+X_LAB <- paste("Scaled", top[3], "Expression")
+
+c <- 
+  ggplot(Treatment_Data, aes(x=Treatment_Data[,top[3]], y=Treatment, fill = Treatment)) +
+  geom_density_ridges(scale = 5, alpha=0.6, size = 0.2) +
+  theme_ridges() +
+  scale_fill_manual(labels = c("0.3 \U03BCm",
+                               "1.1 \U03BCm",
+                               "Control"),
+                    values = c('#dfb433', '#3c7a47',"black"),
+                    guide = "none") +
+  scale_y_discrete(expand = c(0.1, 0), labels=c("0.3 \U03BCm",
+                               "1.1 \U03BCm",
+                               "Control")) +
+  labs(x=X_LAB, y="Treatment") +
+  ggtitle("C") +
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.y = element_text(size=10, family = "sans", face = "bold"),
+        axis.title.x = element_text(size=10, family = "sans", face = "bold"),
+        axis.text.y = element_text(size=8, family = "sans", face = "bold"),
+        axis.text.x  = element_text(size=8, family = "sans"),
+        plot.title = element_text(hjust = -0.05, size = 10, family = "sans", face = "bold"),
+        legend.position = "none",
+        legend.title = element_blank(),
+        legend.text = element_text(size = 6, family = "sans", face = "bold"),
+        legend.background =  element_rect(fill = "transparent", colour = "transparent"),
+        legend.key = element_rect(fill = "transparent", colour = "transparent"),
+        legend.key.size = unit(0.15, "cm"),
+        legend.key.width = unit(0.2, "cm"),
+        legend.spacing.y = unit(-0.1, "cm"),
+        panel.background = element_rect(fill = "transparent"),
+        plot.background = element_rect(fill = "transparent", color = NA))
+
+FIG <- arrangeGrob(a, b, c, ncol = 1)
+
+grid.arrange(a, b, c, ncol = 1)
+
+
+
+ggsave(FIG,
+       file="Figures/Treatment_Density_Plot.png",
+       width = 5.75,
+       height=6,
+       units = "in",
+       dpi = 600)
+
+```
+
+```{r, echo = FALSE, fig.cap="Figure S9 Venn diagram of the proteins expressed within the different groups.", fig.align="center"}
+
+venn.plot <-
+  draw.triple.venn(area1 = length(which(control > 0)),
+                   area2 = length(which(B0.3 > 0)),
+                   area3 = length(which(B1.1 > 0)),
+                   n12 = length(which(control > 0 & B0.3 > 0)),
+                   n23 = length(which(B0.3 > 0 & B1.1 > 0)),
+                   n13 = length(which(control > 0 & B1.1 > 0)),
+                   n123 = length(which(control > 0 & B0.3 > 0 & B1.1 > 0)),
+                   category = c("Control", "0.3 \U03BCm", "1.1 \U03BCm"),
+                   fill = c("black", "#3c7a47", "#dfb433"),
+                   lty = "solid",
+                   lwd = 1,
+                   alpha = 0.8,
+                   cex = 0.7,
+                   cat.cex = 0.8,
+                   fontfamily = "sans",
+                   fontface = "bold",
+                   cat.fontfamily = "sans",
+                   cat.fontface = "bold")
+
+png(file = "Figures/Venn_diagram.png",
+    width = 3.23,
+    height=3,
+    units = "in",
+    res = 600,
+    bg = "transparent");
+grid.draw(venn.plot);
+dev.off()
+```
+
+## Differentially Expressed Proteins (DEPs)
+
+Differentially expressed proteins (DEPs) of normalized data were identified using the R package `limma`. An adjusted p-value to correct for multiple testing was calculated using the Benjamini–Hochberg method. The most widely used correction for genomic studies is the Benjamini-Hochberg (BH) correction, that aims to control the FDR across significant genes.
+
+```{r}
+#Convert to a numeric matrix and log transform
+DATA <- as.matrix(t(data))
+DATA <- log(DATA + 1)
+DATA <- DATA[,-4]
+
+#Create the design matrix
+design <- cbind(Exposure = as.numeric(Treatment_2)[-4],
+                Treatment = as.numeric(Treatment)[-4])
+
+
+#Run the analysis and compile the results
+test <- lmFit(DATA, design = model.matrix(~ 1 + design[,1]))
+test2 <- eBayes(test)
+test3 <- topTable(test2, number = length(test2$coefficients), sort.by = "none")
+
+#Which proteins are differentially expressed
+GN[which(test3$adj.P.Val < 0.05)]
+GN[which(test3$P.Val < 0.05)]
+
+write.csv(test3, file = "Results/DEPs.csv")
+```
+
+
+
+```{r, echo = FALSE, fig.cap="Figure S10 Volcano plot of the proteomics analysis comparing oocytes exposed to 0.3 \U03BCm MPs vs the controls.", fig.align="center"}
+
+data <- read.csv("Results/B0.3_vs_CT_MsEmpire.csv")
+
+labs <- data[which(data$p.adj < 0.05),"gene.names"]
+labs[10] <- "H2AC16"
+coords <- data[which(data$p.adj < 0.05),c("log2FC", "p.adj")]
+coords$p.adj <- -log(coords$p.adj)
+
+Volcano_Plot <- 
+  ggplot(data, aes(x=log2FC, y=-log(p.adj), color = ifelse(p.adj < 0.05,"red", "#046C9A"))) +
+  geom_point(size=0.4) +
+  scale_color_manual(labels=c("Control", "MP exposure"),
+                     values = c("#046C9A", "red"),
+                     guide = "none") +
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.y = element_text(size=14, family = "sans", face = "bold"),
+        axis.title.x = element_text(size=14, family = "sans", face = "bold"),
+        axis.text.y = element_text(size=12, family = "sans", face = "bold"),
+        axis.text.x  = element_text(size=12, family = "sans"),
+        plot.title = element_text(hjust = -0.05, size = 10, family = "sans", face = "bold"),
+        legend.position = c(0.15,0.1),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 6, family = "sans", face = "bold"),
+        legend.background =  element_rect(fill = "transparent", colour = "transparent"),
+        legend.key = element_rect(fill = "transparent", colour = "transparent"),
+        legend.key.size = unit(0.15, "cm"),
+        legend.key.width = unit(0.2, "cm"),
+        legend.spacing.y = unit(-0.1, "cm"),
+        panel.background = element_rect(fill = "transparent"),
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+    scale_y_continuous(expand = c(0,0.2)) +
+    xlab(expression(bold(log[2]~fold~change))) +
+    ylab(expression(bold(-log~adjusted~p~value))) +
+    geom_text_repel(data = coords, aes(x = log2FC, 
+                        y = p.adj, 
+                        label = labs), col = "red", size = 2)
+
+Volcano_Plot
+
+ggsave(Volcano_Plot,
+       file="Figures/Volcano_03.png",
+       width = 5.75,
+       height=4,
+       units = "in",
+       dpi = 600)
+```
+
+
+```{r, echo = FALSE, fig.cap="Figure S11 Volcano plot of the proteomics analysis comparing oocytes exposed to 1.1 \U03BCm MPs vs the controls.", fig.align="center"}
+
+data <- read.csv("Results/B1.1_vs_CT_MsEmpire.csv")
+
+labs <- data[which(data$p.adj < 0.05),"gene.names"]
+coords <- data[which(data$p.adj < 0.05),c("log2FC", "p.adj")]
+coords$p.adj <- -log(coords$p.adj)
+
+Volcano_Plot <- 
+  ggplot(data, aes(x=log2FC, y=-log(p.adj), color = ifelse(p.adj < 0.05,"red", "#046C9A"))) +
+  geom_point(size=0.4) +
+  scale_color_manual(labels=c("Control", "MP exposure"),
+                     values = c("#046C9A", "red"),
+                     guide = "none") +
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.y = element_text(size=14, family = "sans", face = "bold"),
+        axis.title.x = element_text(size=14, family = "sans", face = "bold"),
+        axis.text.y = element_text(size=12, family = "sans", face = "bold"),
+        axis.text.x  = element_text(size=12, family = "sans"),
+        plot.title = element_text(hjust = -0.05, size = 10, family = "sans", face = "bold"),
+        legend.position = c(0.15,0.1),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 6, family = "sans", face = "bold"),
+        legend.background =  element_rect(fill = "transparent", colour = "transparent"),
+        legend.key = element_rect(fill = "transparent", colour = "transparent"),
+        legend.key.size = unit(0.15, "cm"),
+        legend.key.width = unit(0.2, "cm"),
+        legend.spacing.y = unit(-0.1, "cm"),
+        panel.background = element_rect(fill = "transparent"),
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+    scale_y_continuous(expand = c(0,0.2)) +
+    xlab(expression(bold(log[2]~fold~change))) +
+    ylab(expression(bold(-log~adjusted~p~value))) +
+    geom_text_repel(data = coords, aes(x = log2FC, 
+                        y = p.adj, 
+                        label = labs), col = "red", size = 2)
+
+Volcano_Plot
+
+ggsave(Volcano_Plot,
+       file="Figures/Volcano_11.png",
+       width = 5.75,
+       height=4,
+       units = "in",
+       dpi = 600)
 ```

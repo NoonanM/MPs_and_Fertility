@@ -1,0 +1,26 @@
+﻿Sample,Classification,Count
+FF1,Plastic Polymer,30
+FF2,Plastic Polymer,30
+FF3,Plastic Polymer,522
+WtCTRL1,Plastic Polymer,32
+WtCTRL2,Plastic Polymer,25
+FF1,"Coating, solvent and filler",24
+FF2,"Coating, solvent and filler",40
+FF3,"Coating, solvent and filler",147
+WtCTRL1,"Coating, solvent and filler",84
+WtCTRL2,"Coating, solvent and filler",93
+FF1,Pigment,5
+FF2,Pigment,8
+FF3,Pigment,7
+WtCTRL1,Pigment,3
+WtCTRL2,Pigment,8
+FF1,Plasticizer,32
+FF2,Plasticizer,7
+FF3,Plasticizer,182
+WtCTRL1,Plasticizer,3
+WtCTRL2,Plasticizer,25
+FF1,Non-plastic related,120
+FF2,Non-plastic related,259
+FF3,Non-plastic related,1364
+WtCTRL1,Non-plastic related,47
+WtCTRL2,Non-plastic related,70
