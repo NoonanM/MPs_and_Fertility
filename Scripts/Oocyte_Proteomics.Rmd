@@ -1,0 +1,144 @@
+---
+title: "Untitled"
+output: html_document
+date: "2022-09-06"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir = "/Users/michaelnoonan/Dropbox (Personal)/UBC/Side_Projects/MPs_and_Fertility")
+```
+
+The first steps was to perform some data carpentry to get the data in the correct format for analysis.
+
+```{r}
+library(tidyverse)
+library(msEmpiRe)
+library(Biobase)
+
+p_file  <- "Data/peptides.txt"
+
+PG_names <- read.delim("Data/proteinGroups.txt", sep = "\t", header = T) %>% 
+  select(starts_with("Intensity.")) %>% 
+  names() %>% 
+  str_replace_all("Intensity.","")
+
+df <- data.frame(PG_names,PG_names)  
+write.table(df,"Results/labels.txt",
+            row.names = F,
+            sep = "\t",
+            col.names = c("sample","condition"),
+            quote = F)
+
+#display the conditions
+read.delim("Results/labels.txt")
+
+peptide_data <- read.MaxQuant("Data/peptides.txt",
+                              "Results/labels.txt")
+
+all_conditions <- extract_conditions(peptide_data)
+
+MP1um_vs_C_cond <- all_conditions[,c(1,3)]
+MP300nm_vs_C_cond <- all_conditions[,c(1,2)]
+MP1um_vs_300nm_cond <- all_conditions[,c(2,3)]
+
+
+#prepare the PGfile: remove the proteins with "only identified by site" and filter the peptide.ids for razor and unique peptides
+
+#read in protein groups file
+PG <- read.delim("Data/proteinGroups.txt",
+                 sep = "\t",
+                 header = T)
+
+#extract the peptide.ids column and make a list consisting of the the individual peptide ids
+peptide_ids <- PG$Peptide.IDs %>% 
+  strsplit(";")
+
+#extract the Peptide.is.razor column and make a list with contains the positions of "True", indicating which peptide ids are razor peptides for this specific protein
+razors_indeces <- strsplit(PG$Peptide.is.razor, ";" ) %>% 
+  lapply(function(x) {which(x %in% "True" )})
+
+#use the index list to remove the non-razor peptides and overwrite the Peptide.IDs column
+
+PG$Peptide.IDs <- Map("[", peptide_ids, razors_indeces) %>% 
+  lapply(function(x) {paste(x, collapse =  ";")}) %>% 
+  unlist()
+
+#remove the Only.identified.by.site protein groups and filter for at least 2 unique/razor peptides.
+
+PG_modified <- filter(PG, Only.identified.by.site != "+") %>% 
+  filter(Razor...unique.peptides >= 2)
+
+
+write_delim(PG_modified,
+            file = "Results/proteinGroups_modified.txt",
+            delim = "\t",
+            col_names = TRUE)
+
+```
+
+
+Next we defined a custom function for the proteomics analysis.
+
+```{r}
+
+filter_normalize_analyze <- function(peptide_data,
+                                     PG_modified,
+                                     conditions,
+                                     rate = 2){
+  
+  result <-  filter_MaxQuant(peptide_data,
+                             PG_modified_path) %>% 
+    
+    filter_detection_rate(rate = rate,
+                          condition = conditions) %>% 
+    
+    msEmpiRe::normalize() %>%
+    
+    de.ana()
+  
+  return(result)
+}
+```
+
+Finally, we applied the analysis to the proteomics data using the function defined above.
+
+```{r}
+
+#Set the seed to keep the results reproducible
+set.seed(1234)
+
+PG_modified_path <- "Results/proteinGroups_modified.txt"
+results_MP1um_vs_C <- filter_normalize_analyze(peptide_data,
+                                               PG_modified_path,
+                                               MP1um_vs_C_cond) 
+
+write_delim(results_MP1um_vs_C,
+            "Results/output_msEmpiRe_MP1um_vs_C.txt",
+            delim = "\t",
+            col_names = TRUE)
+
+results_MP300nm_vs_C <- filter_normalize_analyze(peptide_data,
+                                                 PG_modified_path,
+                                                 MP300nm_vs_C_cond)
+
+write_delim(results_MP300nm_vs_C,
+            "Results/output_msEmpiRe_MP300nm_vs_C.txt",
+            delim = "\t",
+            col_names = TRUE)
+
+results_MP1um_vs_300nm <- filter_normalize_analyze(peptide_data,
+                                                   PG_modified_path,
+                                                   MP1um_vs_300nm_cond)
+
+write_delim(results_MP1um_vs_300nm,
+            "Results/output_msEmpiRe_MP1um_vs_300nm.txt",
+            delim = "\t",
+            col_names = TRUE)
+
+```
+
+
+
+
+
