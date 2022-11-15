@@ -1,6 +1,6 @@
 ---
 title: "Supplementary File S1. R code used to generate the results and figures presented in the main text."
-author: "Nicole Grechi, Roksan Franko, Roshini Rajaraman, Jan B. Stöckl, Thomas Fröhlich, Michael J. Noonan, Marcia de A. M. M. Ferraz"
+author: "Nicole Grechi, Roksan Franko, Roshini Rajaraman, Jan B. Stöckl, Tom Trapphoff, Stefan Dieterle, Thomas Fröhlich, Michael J. Noonan, Marcia de A. M. M. Ferraz"
 output:
   html_document:
     css: Template.css
@@ -84,10 +84,59 @@ C <-
                                "Polyethylene",
                                "Polypropoylene",
                                "Polystyrene",
+                               "Polyurethene",
                                "Polyvinyl chloride",
+                               "Rubber",
                                "Silicon(IV) oxide"),
                     values = c("#001219", "#8d96a3", "#005F73", "#0A9396", "#94D2BD",
-                               "#E9D8A6","#EE9B00", "#CA6702",  "#9B2226",  "#6d597a", "#355070")) +
+                               "#E9D8A6","#EE9B00", "#CA6702",  "#9B2226",  "#6d597a", "#355070",  "#fbb13c", "#bf0603")) +
+  theme_bw()+
+  theme(panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        axis.title.y = element_text(size=14, family = "sans", face = "bold"),
+        axis.title.x = element_text(size=14, family = "sans", face = "bold"),
+        axis.text.y = element_text(size=12, family = "sans"),
+        axis.text.x  = element_text(size=12, family = "sans"),
+        plot.title = element_text(hjust = -0.05, size = 10, family = "sans", face = "bold"),
+        legend.position = c(0.15,0.7 ),
+        legend.title = element_blank(),
+        legend.text = element_text(size = 10, family = "sans", face = "bold"),
+        legend.background =  element_rect(fill = "transparent", colour = "transparent"),
+        legend.key = element_rect(fill = "transparent", colour = "transparent"),
+        legend.key.size = unit(0.15, "cm"),
+        legend.key.width = unit(0.2, "cm"),
+        legend.spacing.y = unit(-0.1, "cm"),
+        panel.background = element_rect(fill = "transparent"),
+        plot.background = element_rect(fill = "transparent", color = NA)) +
+  scale_y_continuous(limits = c(0,610), expand = c(0,1)) +
+  scale_x_discrete(breaks = c("BovFF1", "BovFF2", "BovFF3", "HumFF1", "HumFF2", "HumFF3", "HumFF4"),
+                   labels = c("FF1 Bov", "FF2 Bov", "FF3 Bov", "FF1 Hum", "FF2 Hum", "FF3 Hum", "FF4 Hum")) +
+  xlab(expression(bold(Follicular~fluid~sample))) +
+  ylab(expression(bold(Number~of~particles~per~mL)))
+
+C
+
+C_Inset <- 
+  ggplot(data = data2[-which(data2$Sample == "HumFF4"),], 
+         aes(x = Sample,
+             y = particles_ml,
+             fill = Microplastic)) +
+  geom_bar(stat = "identity", alpha = 0.8) +
+  scale_fill_manual(labels = c("ABS",
+                               "Cellulose",
+                               "Nylon",
+                               "Other",
+                               "Polyamide",
+                               "Polyester",
+                               "Polyethylene",
+                               "Polypropoylene",
+                               "Polystyrene",
+                               "Polyurethene",
+                               "Polyvinyl chloride",
+                               "Rubber",
+                               "Silicon(IV) oxide"),
+                    values = c("#001219", "#8d96a3", "#005F73", "#0A9396", "#94D2BD",
+                               "#E9D8A6","#EE9B00", "#CA6702",  "#9B2226",  "#6d597a", "#355070",  "#fbb13c", "#bf0603")) +
   theme_bw()+
   theme(panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(),
@@ -107,26 +156,35 @@ C <-
         panel.background = element_rect(fill = "transparent"),
         plot.background = element_rect(fill = "transparent", color = NA)) +
   scale_y_continuous(limits = c(0,95), expand = c(0,1)) +
-  scale_x_discrete(breaks = c("FF1", "FF2", "FF3"), labels = c("FF1", "FF2", "FF3")) +
+  scale_x_discrete(breaks = c("BovFF1", "BovFF2", "BovFF3", "HumFF1", "HumFF2", "HumFF3", "HumFF4"),
+                   labels = c("FF1 Bov", "FF2 Bov", "FF3 Bov", "FF1 Hum", "FF2 Hum", "FF3 Hum", "FF4 Hum")) +
   xlab(expression(bold(Follicular~fluid~sample))) +
   ylab(expression(bold(Number~of~particles~per~mL)))
 
-C
+C_Inset
 ```
 
 ```{r, include = FALSE}
 #Save the figures
 ggsave(C,
-       width = 5.75, height = 4.8, units = "in",
+       width = 5.9, height = 4.8, units = "in",
        dpi = 600,
        bg = "transparent",
        file="Figures/FF_Fig.png")
+
+ggsave(C_Inset,
+       width = 5.75, height = 4.8, units = "in",
+       dpi = 600,
+       bg = "transparent",
+       file="Figures/FF_Fig_Inset.png")
 ```
 
 ```{r, fig.cap="Reproduction of Fig. 1D Bar chart depicting the number of plastic particles found in cow follicular fluid samples.", fig.align="center"}
 
+data_no_water <- data[-which(data$Sample == "WtCTRL1" | data$Sample== "WtCTRL2" | data$Sample== "WtCTRL3" | data$Sample== "WtCTRL4"),]
+
 D <- 
-  ggplot(data = data, 
+  ggplot(data = data_no_water, 
          aes(x = Sample,
              y = Count,
              fill = Classification)) +
@@ -156,8 +214,8 @@ D <-
         panel.background = element_rect(fill = "transparent"),
         plot.background = element_rect(fill = "transparent", color = NA)) +
   scale_y_continuous(expand = c(0,0.005)) +
-  scale_x_discrete(breaks = c("FF1", "FF2", "FF3", "WtCTRL1", "WtCTRL2"),
-                   labels = c("FF1", "FF2", "FF3", "Water 1", "Water 2")) +
+  scale_x_discrete(breaks = c("BovFF1", "BovFF2", "BovFF3", "HumFF1", "HumFF2", "HumFF3", "HumFF4"),
+                   labels = c("FF1 Bov", "FF2 Bov", "FF3 Bov", "FF1 Hum", "FF2 Hum", "FF3 Hum", "FF4 Hum")) +
   xlab(expression(bold(Sample))) +
   ylab(expression(bold(Proportion~of~particles~per~mL)))
 
@@ -167,12 +225,11 @@ D
 ```{r, include = FALSE}
 #Save the figures
 ggsave(D,
-       width = 5.75, height = 4.8, units = "in",
+       width = 8, height = 4.8, units = "in",
        dpi = 600,
        bg = "transparent",
        file="Figures/MP_Composition.png")
 ```
-
 
 ## MPs reduce oocyte maturation and induce damage of the zona pellucidae
 
@@ -309,7 +366,7 @@ A <-
              fill = Treatment)) +
   geom_point(aes(col = Treatment),
              position = position_jitterdodge(jitter.width = 0.05),
-             size = 0.1) +
+             size = 0.3) +
   geom_boxplot(size = 0.2,
                alpha = 0.5,
                outlier.size = 0,
@@ -343,7 +400,8 @@ A <-
         plot.background = element_rect(fill = "transparent", color = NA)) +
   scale_y_continuous(limits = c(0,100), expand = c(0,1)) +
   scale_x_discrete(breaks = c("BZP", "DG", "MT"), labels = c("Broken zona pellucidae", "Degraded", "Mature")) +
-  ylab(expression(bold(Percentage~of~oocytes~"(%)")))
+  ylab(expression(bold(Percentage~of~oocytes~"(%)")))  +
+  guides(colour = guide_legend(override.aes = list(size=1))) 
 
 A
 ```
@@ -906,7 +964,7 @@ A <-
              fill = Treatment)) +
   geom_point(aes(col = Treatment),
              position = position_jitterdodge(jitter.width = 0.05),
-             size = 0.1) +
+             size = 0.3) +
   geom_boxplot(size = 0.2,
                alpha = 0.5,
                outlier.size = 0,
@@ -1040,7 +1098,7 @@ A <-
              fill = Treatment)) +
   geom_point(aes(col = Treatment),
              position = position_jitterdodge(jitter.width = 0.05),
-             size = 0.1) +
+             size = 0.3) +
   geom_boxplot(size = 0.2,
                alpha = 0.5,
                outlier.size = 0,
@@ -1179,7 +1237,7 @@ A <-
              fill = Treatment)) +
   geom_point(aes(col = Treatment),
              position = position_jitterdodge(jitter.width = 0.05),
-             size = 0.1) +
+             size = 0.3) +
   geom_boxplot(size = 0.2,
                alpha = 0.5,
                outlier.size = 0,
@@ -1325,7 +1383,7 @@ A <-
              fill = Treatment)) +
   geom_point(aes(col = Treatment),
              position = position_jitterdodge(jitter.width = 0.05),
-             size = 0.1) +
+             size = 0.3) +
   geom_boxplot(size = 0.2,
                alpha = 0.5,
                outlier.size = 0,

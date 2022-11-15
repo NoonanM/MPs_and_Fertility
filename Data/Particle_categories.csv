@@ -1,31 +1,67 @@
-﻿Sample,Classification,Count
-FF1,Plastic Polymer,29
-FF2,Plastic Polymer,21
-FF3,Plastic Polymer,128
+Sample,Classification,Count
+BovFF1,Plastic Polymer,29
+BovFF2,Plastic Polymer,21
+BovFF3,Plastic Polymer,128
 WtCTRL1,Plastic Polymer,27
 WtCTRL2,Plastic Polymer,9
-FF1,"Coating, solvent and filler",24
-FF2,"Coating, solvent and filler",40
-FF3,"Coating, solvent and filler",147
+BovFF1,"Coating, solvent and filler",24
+BovFF2,"Coating, solvent and filler",40
+BovFF3,"Coating, solvent and filler",147
 WtCTRL1,"Coating, solvent and filler",84
 WtCTRL2,"Coating, solvent and filler",93
-FF1,Pigment,5
-FF2,Pigment,8
-FF3,Pigment,7
+BovFF1,Pigment,5
+BovFF2,Pigment,8
+BovFF3,Pigment,7
 WtCTRL1,Pigment,3
 WtCTRL2,Pigment,8
-FF1,Plasticizer,32
-FF2,Plasticizer,7
-FF3,Plasticizer,182
+BovFF1,Plasticizer,32
+BovFF2,Plasticizer,7
+BovFF3,Plasticizer,182
 WtCTRL1,Plasticizer,3
 WtCTRL2,Plasticizer,25
-FF1,Non-plastic related,120
-FF2,Non-plastic related,259
-FF3,Non-plastic related,1364
+BovFF1,Non-plastic related,120
+BovFF2,Non-plastic related,259
+BovFF3,Non-plastic related,1364
 WtCTRL1,Non-plastic related,47
 WtCTRL2,Non-plastic related,70
-FF1,Fiber,11
-FF2,Fiber,1
-FF3,Fiber,243
+BovFF1,Fiber,11
+BovFF2,Fiber,1
+BovFF3,Fiber,243
 WtCTRL1,Fiber,2
 WtCTRL2,Fiber,15
+HumFF1,Plastic Polymer,68
+HumFF2,Plastic Polymer,38
+HumFF3,Plastic Polymer,14
+WtCTRL3,Plastic Polymer,28
+WtCTRL4,Plastic Polymer,72
+HumFF1,"Coating, solvent and filler",821
+HumFF2,"Coating, solvent and filler",311
+HumFF3,"Coating, solvent and filler",77
+WtCTRL3,"Coating, solvent and filler",5
+WtCTRL4,"Coating, solvent and filler",66
+HumFF1,Pigment,0
+HumFF2,Pigment,0
+HumFF3,Pigment,0
+WtCTRL3,Pigment,0
+WtCTRL4,Pigment,2
+HumFF1,Plasticizer,4485
+HumFF2,Plasticizer,1901
+HumFF3,Plasticizer,373
+WtCTRL3,Plasticizer,35
+WtCTRL4,Plasticizer,82
+HumFF1,Non-plastic related,3428
+HumFF2,Non-plastic related,2178
+HumFF3,Non-plastic related,629
+WtCTRL3,Non-plastic related,109
+WtCTRL4,Non-plastic related,96
+HumFF1,Fiber,61
+HumFF2,Fiber,94
+HumFF3,Fiber,30
+WtCTRL3,Fiber,205
+WtCTRL4,Fiber,286
+HumFF4,Plastic Polymer,776
+HumFF4,"Coating, solvent and filler",5544
+HumFF4,Pigment,4
+HumFF4,Plasticizer,3463
+HumFF4,Non-plastic related,11322
+HumFF4,Fiber,217
