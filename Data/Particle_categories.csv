@@ -1,67 +1,91 @@
-Sample,Classification,Count
-BovFF1,Plastic Polymer,29
-BovFF2,Plastic Polymer,21
-BovFF3,Plastic Polymer,128
-WtCTRL1,Plastic Polymer,27
-WtCTRL2,Plastic Polymer,9
-BovFF1,"Coating, solvent and filler",24
-BovFF2,"Coating, solvent and filler",40
-BovFF3,"Coating, solvent and filler",147
-WtCTRL1,"Coating, solvent and filler",84
-WtCTRL2,"Coating, solvent and filler",93
-BovFF1,Pigment,5
-BovFF2,Pigment,8
-BovFF3,Pigment,7
-WtCTRL1,Pigment,3
-WtCTRL2,Pigment,8
-BovFF1,Plasticizer,32
-BovFF2,Plasticizer,7
-BovFF3,Plasticizer,182
-WtCTRL1,Plasticizer,3
-WtCTRL2,Plasticizer,25
-BovFF1,Non-plastic related,120
-BovFF2,Non-plastic related,259
-BovFF3,Non-plastic related,1364
-WtCTRL1,Non-plastic related,47
-WtCTRL2,Non-plastic related,70
-BovFF1,Fiber,11
-BovFF2,Fiber,1
-BovFF3,Fiber,243
-WtCTRL1,Fiber,2
-WtCTRL2,Fiber,15
-HumFF1,Plastic Polymer,68
-HumFF2,Plastic Polymer,38
-HumFF3,Plastic Polymer,14
-WtCTRL3,Plastic Polymer,28
-WtCTRL4,Plastic Polymer,72
-HumFF1,"Coating, solvent and filler",821
-HumFF2,"Coating, solvent and filler",311
-HumFF3,"Coating, solvent and filler",77
-WtCTRL3,"Coating, solvent and filler",5
-WtCTRL4,"Coating, solvent and filler",66
-HumFF1,Pigment,0
-HumFF2,Pigment,0
-HumFF3,Pigment,0
-WtCTRL3,Pigment,0
-WtCTRL4,Pigment,2
-HumFF1,Plasticizer,4485
-HumFF2,Plasticizer,1901
-HumFF3,Plasticizer,373
-WtCTRL3,Plasticizer,35
-WtCTRL4,Plasticizer,82
-HumFF1,Non-plastic related,3428
-HumFF2,Non-plastic related,2178
-HumFF3,Non-plastic related,629
-WtCTRL3,Non-plastic related,109
-WtCTRL4,Non-plastic related,96
-HumFF1,Fiber,61
-HumFF2,Fiber,94
-HumFF3,Fiber,30
-WtCTRL3,Fiber,205
-WtCTRL4,Fiber,286
-HumFF4,Plastic Polymer,776
-HumFF4,"Coating, solvent and filler",5544
-HumFF4,Pigment,4
-HumFF4,Plasticizer,3463
-HumFF4,Non-plastic related,11322
-HumFF4,Fiber,217
+﻿Sample,Classification,Count
+FF1bov,Plastic Polymer,29
+FF2bov,Plastic Polymer,21
+FF3bov,Plastic Polymer,128
+WtCTRL1,Plastic Polymer,7
+WtCTRL2,Plastic Polymer,9
+FF1bov,"Coating, solvent and filler",24
+FF2bov,"Coating, solvent and filler",40
+FF3bov,"Coating, solvent and filler",147
+WtCTRL1,"Coating, solvent and filler",84
+WtCTRL2,"Coating, solvent and filler",103
+FF1bov,Pigment,5
+FF2bov,Pigment,8
+FF3bov,Pigment,7
+WtCTRL1,Pigment,3
+WtCTRL2,Pigment,8
+FF1bov,Plasticizer,32
+FF2bov,Plasticizer,7
+FF3bov,Plasticizer,182
+WtCTRL1,Plasticizer,23
+WtCTRL2,Plasticizer,25
+FF1bov,Non-plastic related,120
+FF2bov,Non-plastic related,259
+FF3bov,Non-plastic related,1364
+WtCTRL1,Non-plastic related,47
+WtCTRL2,Non-plastic related,70
+FF1bov,Fiber,11
+FF2bov,Fiber,1
+FF3bov,Fiber,243
+WtCTRL1,Fiber,2
+WtCTRL2,Fiber,15
+FF1hum,Plastic Polymer,68
+FF2hum,Plastic Polymer,38
+FF3hum,Plastic Polymer,14
+WtCTRL3,Plastic Polymer,18
+WtCTRL4,Plastic Polymer,72
+FF1hum,"Coating, solvent and filler",821
+FF2hum,"Coating, solvent and filler",311
+FF3hum,"Coating, solvent and filler",77
+WtCTRL3,"Coating, solvent and filler",35
+WtCTRL4,"Coating, solvent and filler",66
+FF1hum,Pigment,0
+FF2hum,Pigment,0
+FF3hum,Pigment,0
+WtCTRL3,Pigment,0
+WtCTRL4,Pigment,2
+FF1hum,Plasticizer,4485
+FF2hum,Plasticizer,1901
+FF3hum,Plasticizer,373
+WtCTRL3,Plasticizer,35
+WtCTRL4,Plasticizer,82
+FF1hum,Non-plastic related,3428
+FF2hum,Non-plastic related,2178
+FF3hum,Non-plastic related,629
+WtCTRL3,Non-plastic related,109
+WtCTRL4,Non-plastic related,96
+FF1hum,Fiber,61
+FF2hum,Fiber,94
+FF3hum,Fiber,30
+WtCTRL3,Fiber,205
+WtCTRL4,Fiber,286
+FF4hum,Plastic Polymer,776
+FF4hum,"Coating, solvent and filler",5544
+FF4hum,Pigment,4
+FF4hum,Plasticizer,3463
+FF4hum,Non-plastic related,11322
+FF4hum,Fiber,217
+FF5hum,Plastic Polymer,154
+FF5hum,"Coating, solvent and filler",576
+FF5hum,Pigment,4
+FF5hum,Plasticizer,970
+FF5hum,Non-plastic related,2576
+FF5hum,Fiber,68
+FF6hum,Plastic Polymer,79
+FF6hum,"Coating, solvent and filler",347
+FF6hum,Pigment,1
+FF6hum,Plasticizer,602
+FF6hum,Non-plastic related,533
+FF6hum,Fiber,35
+FF7hum,Plastic Polymer,21
+FF7hum,"Coating, solvent and filler",143
+FF7hum,Pigment,2
+FF7hum,Plasticizer,135
+FF7hum,Non-plastic related,131
+FF7hum,Fiber,27
+WtCTRL5,Plastic Polymer,5
+WtCTRL5,"Coating, solvent and filler",22
+WtCTRL5,Pigment,0
+WtCTRL5,Plasticizer,8
+WtCTRL5,Non-plastic related,15
+WtCTRL5,Fiber,4
